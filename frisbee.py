@@ -7,6 +7,7 @@ in an integrator.
 """
 import numpy as np
 import coefficient_model
+from scipy.integrate import odeint
 """
 Constants:
 PI
@@ -32,7 +33,8 @@ F_gravity = mass*g*np.array([0.,0.,-1.])
 
 class Frisbee(object):
 
-  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot,debug=False):
+  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma,
+               phidot,thetadot,gammadot,debug=False):
     """
     Constructor
 
@@ -112,9 +114,9 @@ class Frisbee(object):
     """
     Return the current coordinates of the frisbee.
     """
-    return [self.x,self.y,self.z,self.vx,self.vy,self.vz,
-            self.phi,self.theta,self.gamma,
-            self.phidot,self.thetadot,self.gammadot]
+    return np.array([self.x,self.y,self.z,self.vx,self.vy,self.vz,
+                     self.phi,self.theta,self.gamma,
+                     self.phidot,self.thetadot,self.gammadot])
 
 
   def update_data_fields(self):
@@ -232,8 +234,8 @@ class Frisbee(object):
     total_force=F_lift+F_drag+F_gravity
     if self.debug:
       print "In get_acceleration:"
-      print "\tC_lift:",C_lift(alpha)
-      print "\tC_drag:",C_drag(alpha)
+      print "\tC_lift:",C_lift
+      print "\tC_drag:",C_drag
       print "\tAmplitude:",force_amplitude
       print "\tF_lift/m:",F_lift/mass
       print "\tF_drag/m:",F_drag/mass
@@ -321,6 +323,19 @@ class Frisbee(object):
     if self.z <= 0.0: return np.zeros_like(coordinates)
     return self.derivatives_array()
 
+  def get_trajectory(self,time_initial,time_final,dt=0.001):
+    """
+    Get a frisbee's trajectory give an initial
+    and final time. The timestep size can be specified.
+    This requires that the frisbee hass been properly
+    initialized with a model.
+    """
+    N_times = int((time_final-time_initial)/dt)
+    times = np.linspace(time_initial,time_final,N_times)
+    coordinates = self.get_coordinates()
+    return odeint(self.equations_of_motion,coordinates,times)
+    
+
 #An example of initializing, printing, and calling a function of the frisbee
 if __name__ == "__main__":
   #Using a single frisbee
@@ -345,9 +360,7 @@ if __name__ == "__main__":
                          phidot,thetadot,gammadot,debug=False)
   model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
   test_frisbee.initialize_model(model)
-  coordinates = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot])
-  times = np.linspace(0,3.0,30)
-  trajectory = odeint(test_frisbee.equations_of_motion,coordinates,times)
+  trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
   print "Integrating the equations of motion at 30 time steps gives"
   print "all 12 kinematic variables at 30 times:",trajectory.shape
   
