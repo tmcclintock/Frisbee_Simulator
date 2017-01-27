@@ -47,4 +47,4 @@ plt.clf()
 #Save it
 outputs = np.array([times,x,y,z]).T
 print outputs.shape,outputs[0::10].shape
-np.savetxt("trajectory.txt",outputs[0::10],header="time (sec); x,y,z (m)")
+np.savetxt("simulated_trajectory.txt",outputs[0::10],header="time (sec); x,y,z (m)")
