@@ -6,6 +6,7 @@ torques about each principle axis.
 
 For more information see, e.g. Hummel 2003.
 """
+import numpy
 """
 Constants:
 PI
@@ -15,7 +16,7 @@ PI = 3.141592653589793
 alpha_0 = 4.0*PI/180. 
 
 class Model(object):
-	def __init__(self,PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
+	def __init__(self,*args):
                 """
                 Constructor
 
@@ -30,6 +31,8 @@ class Model(object):
                 PTxwz: x-axis torque parameter linear in z-axis angular velocity
                 PTzwz: z-axis torque parameter linear in z-axis angular velocity
                 """
+                if isinstance(args[0],numpy.ndarray): args = args[0]
+                PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz=args
 		self.PL0=PL0 
 		self.PLa=PLa 
 		self.PD0=PD0 

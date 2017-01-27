@@ -67,13 +67,18 @@ class Frisbee(object):
     return outstr
 
 
-  def initialize_model(self,PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
+  def initialize_model(self,*args):#PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
     """
     Used to create a model for the forces and
     torques on this frisbee.
     """
-    self.model=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
-
+    if len(args) == 1 and isinstance(args[0],np.ndarray):
+      self.model=coefficient_model.Model(args[0])
+    elif len(args) == 10:
+      PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz = args
+      self.model=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
+    else: raise Exception("Usage error: Model initialized incorrectly.")
+    return
 
   def update_coordinates(self,coordinates):
     """
@@ -329,7 +334,8 @@ if __name__ == "__main__":
                          vx,vy,vz,
                          phi,theta,gamma,
                          phidot,thetadot,gammadot,debug=False)
-  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5)
+  model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
+  test_frisbee.initialize_model(model)
   coordinates = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot])
   times = np.linspace(0,3.0,30)
   trajectory = odeint(test_frisbee.equations_of_motion,coordinates,times)
