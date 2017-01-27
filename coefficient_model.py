@@ -70,5 +70,5 @@ class Model(object):
 
 #An example of initializing and printing a model
 if __name__ == "__main__":
-        test_model = Model(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0)
+        test_model = Model(0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5)
         print test_model
