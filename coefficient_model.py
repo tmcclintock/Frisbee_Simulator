@@ -6,9 +6,13 @@ torques about each principle axis.
 
 For more information see, e.g. Hummel 2003.
 """
-
-import numpy as np
-alpha_0 = 4.0*np.pi/180. #radians (4 degrees), constant value reported in Hummel 2003
+"""
+Constants:
+PI
+alpha_0: angle of attack of minimum drag. See Hummel 2003
+"""
+PI = 3.141592653589793
+alpha_0 = 4.0*PI/180. 
 
 class Model(object):
 	def __init__(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
@@ -17,28 +21,34 @@ class Model(object):
 
                 PL0: lift parameter at 0 angle of attack (alpha)
                 PLa: linear lift parameter that multiplies angle of attack
-                PD0: drag parameter at alpha_0, or the angle of attack at minimum drag
+                PD0: drag parameter at alpha_0
                 PDa: quadratic drag parameter, multiplies square angle of attack
                 PTy0: y-axis torque parameter (pitch) at alpha = 0
                 PTya: y-axis torque parameter linear in alpha
-                PTywy: y-axis torque parameter linear in y-axis angular velocity (wy)
-                PTxwx: x-axis torque parameter linear in x-axis angular velocity (wx)
-                PTxwz: x-axis torque parameter linear in z-axis angular velocity (wz)
-                PTzwz: z-axis torque parameter linear in z-axis angular velocity (wz)
+                PTywy: y-axis torque parameter linear in y-axis angular velocity
+                PTxwx: x-axis torque parameter linear in x-axis angular velocity
+                PTxwz: x-axis torque parameter linear in z-axis angular velocity
+                PTzwz: z-axis torque parameter linear in z-axis angular velocity
                 """
 		self.PL0=PL0 
 		self.PLa=PLa 
 		self.PD0=PD0 
 		self.PDa=PDa 
+		self.PTxwx=PTxwx 
+		self.PTxwz=PTxwz 
 		self.PTy0=PTy0 
 		self.PTya=PTya 
 		self.PTywy=PTywy 
-		self.PTxwx=PTxwx 
-		self.PTxwz=PTxwz 
 		self.PTzwz=PTzwz 
 
         def __str__(self):
-                return "Model: PL0=%.2e\t PLa=%.2e\t PD0=%.2e\t PDa=%.2e\t PTya=%.2e\t PTywy=%.2e\t PTy0=%.2e\t PTxwx=%.2e\t PTxwz=%.2e\t PTzwz%.2e"%(self.PL0, self.PLa, self.PD0, self.PDa, self.PTya, self.PTywy, self.PTy0, self.PTxwx, self.PTxwz, self.PTzwz)
+                outstr = "Model:\n"+\
+                         "PL0=%.2e\tPLa=%.2e\n"%(self.PL0,self.PLa)+\
+                         "PD0=%.2e\tPDa=%.2e\n"%(self.PD0,self.PDa)+\
+                         "PTxwx=%2.e\tPTxwz=%.2e\n"%(self.PTxwx,self.PTxwz)+\
+                         "PTy0=%.2e\tPTwa=%.2e\tPTywy=%.2e\n"%(self.PTy0,self.PTya,self.PTywy)+\
+                         "PTzwz=%.2e"%(self.PTzwz)
+                return outstr
 
         """
         Coefficient functions.
@@ -58,3 +68,7 @@ class Model(object):
 	def C_z(self, wz):
 		return self.PTzwz*wz
 
+#An example of initializing and printing a model
+if __name__ == "__main__":
+        test_model = Model(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0)
+        print test_model
