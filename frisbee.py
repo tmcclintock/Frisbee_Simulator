@@ -323,7 +323,7 @@ class Frisbee(object):
     if self.z <= 0.0: return np.zeros_like(coordinates)
     return self.derivatives_array()
 
-  def get_trajectory(self,time_initial,time_final,dt=0.001):
+  def get_trajectory(self,time_initial,time_final,dt=0.01):
     """
     Get a frisbee's trajectory give an initial
     and final time. The timestep size can be specified.
@@ -333,7 +333,7 @@ class Frisbee(object):
     N_times = int((time_final-time_initial)/dt)
     times = np.linspace(time_initial,time_final,N_times)
     coordinates = self.get_coordinates()
-    return odeint(self.equations_of_motion,coordinates,times)
+    return times,odeint(self.equations_of_motion,coordinates,times)
     
 
 #An example of initializing, printing, and calling a function of the frisbee
@@ -360,7 +360,7 @@ if __name__ == "__main__":
                          phidot,thetadot,gammadot,debug=False)
   model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
   test_frisbee.initialize_model(model)
-  trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
+  times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
   print "Integrating the equations of motion at 30 time steps gives"
   print "all 12 kinematic variables at 30 times:",trajectory.shape
   
