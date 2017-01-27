@@ -75,6 +75,27 @@ class Frisbee(object):
     self.model=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
 
 
+  def update_coordinates(self,coordinates):
+    """
+    Given some new coordinates, update the coordinates
+    """
+    x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot = coordinates
+    self.x=x 
+    self.y=y
+    self.z=z
+    self.vx=vx
+    self.vy=vy
+    self.vz=vz
+    self.phi=phi
+    self.theta=theta
+    self.gamma=gamma
+    self.phidot=phidot
+    self.thetadot=thetadot
+    self.gammadot=gammadot
+    self.update_data_fields()
+    return
+
+
   def get_coordinates(self):
     """
     Return the current coordinates of the frisbee.
@@ -88,7 +109,7 @@ class Frisbee(object):
     """
     Update the data fields in the frisbee.
     """
-    self.calculate_trig_functions()
+    self.calc_trig_functions()
     self.velocity = np.array([self.vx,self.vy,self.vz])
     self.angle_dots = np.array([self.phidot,self.thetadot,self.gammadot])
     self.vhat = self.velocity/np.linalg.norm(self.velocity)
@@ -102,7 +123,7 @@ class Frisbee(object):
     return
 
 
-  def calculate_trig_functions(self):
+  def calc_trig_functions(self):
     """
     Calculates the trig functions
     of the euler angles of the frisbee.
@@ -263,7 +284,6 @@ class Frisbee(object):
     """
     Compute the derivatives of all coordinates.
     """
-    self.update_data_fields()
     derivatives = np.zeros(12)
     derivatives[0:3] = self.velocity
     derivatives[3:6] = self.get_acceleration()
@@ -278,8 +298,18 @@ class Frisbee(object):
     return derivatives
 
 
+  def equations_of_motion(self,coordinates,t):
+    """
+    Return the equations of motion.
+    For use with scipy integrators.
+    """
+    self.update_coordinates(coordinates)
+    if self.z <= 0.0: return np.zeros_like(coordinates)
+    return self.derivatives_array()
+
 #An example of initializing, printing, and calling a function of the frisbee
 if __name__ == "__main__":
+  #Using a single frisbee
   x,y,z = 0.0, 0.0, 1.0
   vx,vy,vz = 10.0,0.0,0.0
   phi,theta,gamma = 0.0,0.0,0.0
@@ -291,3 +321,18 @@ if __name__ == "__main__":
   test_frisbee.initialize_model(0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5)
   print test_frisbee
   test_frisbee.derivatives_array()
+  print "\n"
+
+  #Integrating a frisbee's equations of motion
+  from scipy.integrate import odeint
+  test_frisbee = Frisbee(x,y,z,
+                         vx,vy,vz,
+                         phi,theta,gamma,
+                         phidot,thetadot,gammadot,debug=False)
+  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5)
+  coordinates = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot])
+  times = np.linspace(0,3.0,30)
+  trajectory = odeint(test_frisbee.equations_of_motion,coordinates,times)
+  print "Integrating the equations of motion at 30 time steps gives"
+  print "all 12 kinematic variables at 30 times:",trajectory.shape
+  
