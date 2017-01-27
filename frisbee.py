@@ -1,6 +1,12 @@
+"""
+The frisbee object. This contains the code to
+initialize a frisbee object along with
+its model for the forces that act on it,
+and an equations of motion function for use
+in an integrator.
+"""
 import numpy as np
 import coefficient_model
-
 """
 Constants:
 PI
@@ -22,6 +28,7 @@ Izz=0.002352
 Ixx=Iyy=Ixy=0.001219 
 diameter=2*(area/PI)**0.5
 F_gravity = mass*g*np.array([0.,0.,-1.])
+
 
 class Frisbee(object):
 
