@@ -34,6 +34,7 @@ coordinates = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,\
 #Integrate it
 trajectory = odeint(test_frisbee.equations_of_motion,coordinates,times)
 x,y,z = trajectory[:,:3].T
+err = np.ones_like(x)*0.05 #5 centimeters
 
 #Plot it
 import matplotlib.pyplot as plt
@@ -45,6 +46,6 @@ plt.plot(x,y,z)
 plt.clf()
 
 #Save it
-outputs = np.array([times,x,y,z]).T
+outputs = np.array([times,x,y,z,err,err,err]).T
 print outputs.shape,outputs[0::10].shape
-np.savetxt("simulated_trajectory.txt",outputs[0::10],header="time (sec); x,y,z (m)")
+np.savetxt("simulated_trajectory.txt",outputs[0::10],header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
