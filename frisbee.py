@@ -73,10 +73,10 @@ class Frisbee(object):
     torques on this frisbee.
     """
     if len(args) == 1 and isinstance(args[0],np.ndarray):
-      self.model=coefficient_model.Model(args[0])
+      self.coefficients=coefficient_model.Model(args[0])
     elif len(args) == 10:
       PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz = args
-      self.model=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
+      self.coefficients=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
     else: raise Exception("Usage error: Model initialized incorrectly.")
     return
 
@@ -218,13 +218,15 @@ class Frisbee(object):
     alpha,v2 = self.angle_of_attack,self.v2
     vhat,ybhat = self.vhat,self.ybhat
     force_amplitude = 0.5*rho*area*v2
-    F_lift = self.model.C_lift(alpha)*force_amplitude*np.cross(vhat,ybhat)
-    F_drag = self.model.C_drag(alpha)*force_amplitude*(-vhat)
+    C_lift =  self.coefficients.C_lift(alpha)
+    C_drag =  self.coefficients.C_drag(alpha)
+    F_lift = C_lift*force_amplitude*np.cross(vhat,ybhat)
+    F_drag = C_drag*force_amplitude*(-vhat)
     total_force=F_lift+F_drag+F_gravity
     if self.debug:
       print "In get_acceleration:"
-      print "\tCL:",self.model.C_lift(alpha)
-      print "\tCD:",self.model.C_drag(alpha)
+      print "\tC_lift:",C_lift(alpha)
+      print "\tC_drag:",C_drag(alpha)
       print "\tAmplitude:",force_amplitude
       print "\tF_lift/m:",F_lift/mass
       print "\tF_drag/m:",F_drag/mass
@@ -240,9 +242,9 @@ class Frisbee(object):
     v2=self.v2
     wxb,wyb,wzb = self.wxb,self.wyb,self.wzb
     torque_amplitude = 0.5*rho*diameter*area*v2
-    C_x = self.model.C_x(wxb,wzb)
-    C_y = self.model.C_y(alpha,wyb)
-    C_z = self.model.C_z(wzb)
+    C_x = self.coefficients.C_x(wxb,wzb)
+    C_y = self.coefficients.C_y(alpha,wyb)
+    C_z = self.coefficients.C_z(wzb)
     torque_x = C_x*torque_amplitude*self.xbhat
     torque_y = C_y*torque_amplitude*self.ybhat
     torque_z = C_z*torque_amplitude*np.array([0,0,1.])
