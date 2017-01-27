@@ -40,17 +40,20 @@ class Model(object):
         def __str__(self):
                 return "Model: PL0=%.2e\t PLa=%.2e\t PD0=%.2e\t PDa=%.2e\t PTya=%.2e\t PTywy=%.2e\t PTy0=%.2e\t PTxwx=%.2e\t PTxwz=%.2e\t PTzwz%.2e"%(self.PL0, self.PLa, self.PD0, self.PDa, self.PTya, self.PTywy, self.PTy0, self.PTxwx, self.PTxwz, self.PTzwz)
 
+        """
+        Coefficient functions.
+        """
 	def C_lift(self, alpha):
 		return self.PL0 + self.PLa*alpha
 
-	def C_drag(self,alpha):
+	def C_drag(self, alpha):
 		return self.PD0 + self.PDa*(alpha-alpha_0)*(alpha-alpha_0)
-
-	def C_y(self, alpha, wy):
-		return self.PTy0 + self.PTywy*wy + self.PTya*alpha
 
 	def C_x(self, wx, wz):
 		return self.PTxwz*wz + self.PTxwx*wx
+
+	def C_y(self, alpha, wy):
+		return self.PTy0 + self.PTywy*wy + self.PTya*alpha
 
 	def C_z(self, wz):
 		return self.PTzwz*wz
