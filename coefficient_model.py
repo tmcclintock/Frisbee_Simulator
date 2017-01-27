@@ -15,7 +15,7 @@ PI = 3.141592653589793
 alpha_0 = 4.0*PI/180. 
 
 class Model(object):
-	def __init__(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
+	def __init__(self,PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
                 """
                 Constructor
 
@@ -53,19 +53,19 @@ class Model(object):
         """
         Coefficient functions.
         """
-	def C_lift(self, alpha):
+	def C_lift(self,alpha):
 		return self.PL0 + self.PLa*alpha
 
-	def C_drag(self, alpha):
+	def C_drag(self,alpha):
 		return self.PD0 + self.PDa*(alpha-alpha_0)*(alpha-alpha_0)
 
-	def C_x(self, wx, wz):
+	def C_x(self,wx,wz):
 		return self.PTxwz*wz + self.PTxwx*wx
 
-	def C_y(self, alpha, wy):
+	def C_y(self,alpha,wy):
 		return self.PTy0 + self.PTywy*wy + self.PTya*alpha
 
-	def C_z(self, wz):
+	def C_z(self,wz):
 		return self.PTzwz*wz
 
 #An example of initializing and printing a model
