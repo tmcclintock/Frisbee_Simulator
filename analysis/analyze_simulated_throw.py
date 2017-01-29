@@ -13,12 +13,11 @@ import frisbee
 
 #Read in the trajectory
 trajectory = np.genfromtxt("../test_data/simulated_trajectory.txt")
-print trajectory.shape
 t,x,y,z,xe,ye,ze = trajectory.T
 data = np.array([t,x,y,z,xe,ye,ze])
 
 #True starting condtions of kinematic variables we don't test
-vx,vy,vz = 0.0,0.0,10.0
+vx,vy,vz = 10.0,0.0,0.0
 phi,theta,gamma = 0.0,0.0,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0 #radians/sec
 
@@ -31,6 +30,12 @@ times = np.linspace(time_initial,time_final,N_times)
 #This is for if we only test a few parameters at a time
 true_model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
 def get_full_model(params):
+    """
+    This function converts our 'mini model', or
+    just a few parameters, to the full model
+    with all the parameters. Must be changed by
+    hand when more parameters are looked at.
+    """
     PL0 = params[0]
     model = true_model.copy()
     model[0] = PL0
@@ -51,11 +56,8 @@ def lnlike(params,data):
                                    phi,theta,gamma,
                                    phidot,thetadot,gammadot)
     test_frisbee.initialize_model(model)
-    print test_frisbee
-    print test_frisbee.coefficients
     times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
     x_test,y_test,z_test = test_trajectory.T[:3]
-    print times.shape, x_test.shape
     x_spline = IUS(times,x_test)
     y_spline = IUS(times,y_test)
     z_spline = IUS(times,z_test)
@@ -74,7 +76,6 @@ def lnpost(params,data):
 #Set up the walkers in parameter space
 test_params = [0.33] #PL0
 print lnpost(test_params,data)
-sys.exit()
 nwalkers = 2
 ndim = 1
 pos = np.zeros((nwalkers,ndim))
@@ -82,10 +83,13 @@ for i in xrange(0,nwalkers):
     pos[i] = test_params + 0.5*np.fabs(test_params)*np.random.randn(ndim)
 
 #Run emcee
-sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data))
-nsteps = 100
+sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data,))
+nsteps = 1000
 sampler.run_mcmc(pos,nsteps)
 
-chain = sampler.chian.reshape((-1,ndim))
+fullchain = sampler.chain.reshape((-1,ndim))
+nburn = 100
+chain = fullchain[int(nburn):]
+np.savetxt("fullchain.txt",fullchain)
 fig = corner.corner(chain)
 plt.show()
