@@ -22,8 +22,8 @@ phi,theta,gamma = 0.0,0.0,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0 #radians/sec
 
 #Times
-time_initial = 0.0
-time_final = 3.0
+time_initial = t[0]
+time_final = t[-1]*1.01 #Go a little higher
 N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
 
@@ -43,6 +43,8 @@ def get_full_model(params):
 
 #The prior
 def lnprior(params):
+    PL0 = params[0]
+    #if PL0 < 0.0: return -np.inf
     #Flat priors with a cutoff at |1|
     if any([np.fabs(params)>=1.0]): return -np.inf
     return 0
@@ -57,7 +59,8 @@ def lnlike(params,data):
                                    phidot,thetadot,gammadot)
     test_frisbee.initialize_model(model)
     times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
-    x_test,y_test,z_test = test_trajectory.T[:3]
+    test_trajectory = test_trajectory.T
+    x_test,y_test,z_test = test_trajectory[:3]
     x_spline = IUS(times,x_test)
     y_spline = IUS(times,y_test)
     z_spline = IUS(times,z_test)
@@ -65,7 +68,9 @@ def lnlike(params,data):
     ychi2 = -0.5*sum((y-y_spline(t))**2/(y_err**2))
     zchi2 = -0.5*sum((z-z_spline(t))**2/(z_err**2))
 
-    return xchi2+ychi2+zchi2
+    #print params,test_trajectory[:3,-1]
+    #print params,xchi2,ychi2,zchi2
+    return xchi2 + ychi2 + zchi2
 
 #The posterior
 def lnpost(params,data):
@@ -80,15 +85,17 @@ nwalkers = 2
 ndim = 1
 pos = np.zeros((nwalkers,ndim))
 for i in xrange(0,nwalkers):
-    pos[i] = test_params + 0.5*np.fabs(test_params)*np.random.randn(ndim)
+    pos[i] = test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim)
 
 #Run emcee
 sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data,))
 nsteps = 1000
 sampler.run_mcmc(pos,nsteps)
 
+#sys.exit()
+
 fullchain = sampler.chain.reshape((-1,ndim))
-nburn = 100
+nburn = 0
 chain = fullchain[int(nburn):]
 np.savetxt("fullchain.txt",fullchain)
 fig = corner.corner(chain)

@@ -47,5 +47,6 @@ plt.clf()
 
 #Save it
 outputs = np.array([times,x,y,z,err,err,err]).T
-print outputs.shape,outputs[0::10].shape
-np.savetxt("simulated_trajectory.txt",outputs[0::10],header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
+outputs = outputs[0::10] #Take only every ten
+outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
+np.savetxt("simulated_trajectory.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
