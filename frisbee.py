@@ -20,7 +20,7 @@ Izz: z-axis moment of inertial; kg*m^2
 Ixx,Iyy,Ixy; x(y,cross)-axis moment of inertia; kg*m^2
 F_gravity: gravitational force on the disc; kg*m/s^2
 """
-PI = 3.141592653589793
+PI=3.141592653589793
 rho=1.225
 area=0.057
 mass=0.175
@@ -28,7 +28,7 @@ g=9.81
 Izz=0.002352 
 Ixx=Iyy=Ixy=0.001219 
 diameter=2*(area/PI)**0.5
-F_gravity = mass*g*np.array([0.,0.,-1.])
+F_gravity=mass*g*np.array([0.,0.,-1.])
 
 
 class Frisbee(object):
