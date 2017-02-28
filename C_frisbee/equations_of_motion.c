@@ -3,7 +3,15 @@
 
 #include "equations_of_motion.h"
 #include "coefficient_model.h"
-#include "constants.h"
+
+#define pi M_PI //pi
+#define m 0.175 //Frisbee mass; kg
+#define g 9.81  //acceleration due to gravity; m/s/s
+#define Area 0.057 //planform area of a frisbee (top down); m^2
+#define d 0.2694//diameter of frisbee; m
+#define rho 1.23//average density of air; kg/m^3
+#define Izz 0.002352 //moment of inertia about ZZ; kg*m^2
+#define Ixy 0.001219 //moment of inertia about either XX or YY; kg*m^2
 
 /*Units convention (unless otherwise noted in the code):
   - all Euclidean positions are in meters
@@ -101,8 +109,9 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   double x = positions[0], y = positions[1], z = positions[2];
   double vx= positions[3], vy= positions[4], vz= positions[5];
   double phi     = positions[6], theta    = positions[7];
-  double phiDot  = positions[8], thetaDot = positions[9];
-  double gammaDot= positions[10], gamma = positions[11];
+  double gamma = positions[8];
+  double phiDot  = positions[9], thetaDot = positions[10];
+  double gammaDot= positions[11];
 
   //Take in the various force and moment coefficients
   double PL0 = params[0], PLa = params[1];
@@ -285,24 +294,26 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   derivs[5] = Ftot[2]/m;
   derivs[6] = phiDot;
   derivs[7] = thetaDot;
-  derivs[8] = (tau_total[0] 
-               + 2*Iss*thetaDot*phiDot*s_tht 
-               - Izz*thetaDot*(phiDot*s_tht+gammaDot)
-              )/(Iss*c_tht);
-  derivs[9] = (tau_total[1]
+  derivs[8] = gammaDot;
+  derivs[9] = (tau_total[0] 
+		+ 2*Ixy*thetaDot*phiDot*s_tht 
+		- Izz*thetaDot*(phiDot*s_tht+gammaDot)
+		)/(Ixy*c_tht);
+
+  derivs[10] = (tau_total[1]
                + Izz*phiDot*c_tht*(phiDot*s_tht+gammaDot)
-               - Iss*phiDot*phiDot*c_tht*s_tht
-              )/Iss;
-  derivs[10]= (tau_total[2]
+               - Ixy*phiDot*phiDot*c_tht*s_tht
+              )/Ixy;
+  derivs[11]= (tau_total[2]
                - Izz*derivs[8]*s_tht
-               - Iss*thetaDot*phiDot*c_tht
+               - Izz*thetaDot*phiDot*c_tht
               )/Izz;
-  derivs[11]= gammaDot;
   //printf("\nt0,t1,t2: %f, %f, %f\n",tau_total[0],tau_total[1],tau_total[2]);
   //printf("\nd0,d1,d2: %f, %f, %f\n",derivs[0],derivs[1],derivs[2]);
   //printf("d3,d4,d5: %f, %f, %f\n",derivs[3],derivs[4],derivs[5]);
 
   if (t<0.04){
+    printf("%f\n",gammaDot);
     //printf("t= %f\td6,d7,d11: %f, %f, %f\n",t,derivs[6],derivs[7],derivs[11]);
     //printf("t=%f\td8,d9,d10: %f, %f, %f\n",t,derivs[8],derivs[9],derivs[10]);
     //printf("gd = %f\n",gammaDot);

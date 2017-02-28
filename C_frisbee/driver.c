@@ -24,7 +24,7 @@ void driver(double*initial_position,double*params,double flight_time,int n_times
   double current_position[n_vars];
 
   //Calculate the time step
-  double dt = flight_time/n_times;
+  double dt = flight_time/(n_times-1);
 
   //Declare the current time
   double t=0;
