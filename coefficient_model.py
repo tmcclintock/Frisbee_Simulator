@@ -44,6 +44,20 @@ class Model(object):
 		self.PTywy=PTywy 
 		self.PTzwz=PTzwz 
 
+	def get_model_as_array(self):
+		"""Return the model parameters just as an array of numbers.
+
+		Args:
+		    None
+		    
+		Returns:
+		    params (array_like): Array of all model parameters.
+
+		"""
+		return numpy.array([self.PL0, self.PLa, self.PD0, self.PDa,
+				    self.PTxwx, self.PTxwz, self.PTy0,
+				    self.PTya, self.PTywy, self.PTzwz])
+
         def __str__(self):
                 outstr = "Model:\n"+\
                          "PL0=%.2e\tPLa=%.2e\n"%(self.PL0,self.PLa)+\
