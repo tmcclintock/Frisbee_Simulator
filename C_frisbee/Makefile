@@ -1,6 +1,6 @@
 EXEC = test.exe
 
-OBJS = glue.o equations_of_motion.o coefficient_model.o
+OBJS = glue.o c_frisbee.o rk4.o equations_of_motion.o coefficient_model.o
 
 CC = gcc
 
