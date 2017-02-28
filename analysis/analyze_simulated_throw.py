@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import emcee, corner
 sys.path.insert(0,"../")
 import frisbee
+np.random.seed(56789)
 
 #Read in the trajectory
 trajectory = np.genfromtxt("../test_data/simulated_trajectory.txt")
@@ -56,7 +57,7 @@ def lnlike(params,data):
     test_frisbee = frisbee.Frisbee(x[0],y[0],z[0],
                                    vx,vy,vz,
                                    phi,theta,gamma,
-                                   phidot,thetadot,gammadot)
+                                   phidot,thetadot,gammadot,use_C=False)
     test_frisbee.initialize_model(model)
     times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
     test_trajectory = test_trajectory.T

@@ -3,6 +3,9 @@
 *.o
 *.so
 
+# special files
+analysis/*.txt
+
 # emacs back-up files and unsaved files
 *~
 #*

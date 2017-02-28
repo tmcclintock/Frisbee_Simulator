@@ -371,7 +371,7 @@ if __name__ == "__main__":
   test_frisbee = Frisbee(x,y,z,
                          vx,vy,vz,
                          phi,theta,gamma,
-                         phidot,thetadot,gammadot,use_C=True,debug=False)
+                         phidot,thetadot,gammadot,use_C=False,debug=False)
   model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
   test_frisbee.initialize_model(model)
   times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
