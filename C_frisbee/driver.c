@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "c_frisbee.h"
+#include "driver.h"
 #include "rk4.h"
 
 void driver(double*initial_position,double*params,double flight_time,int n_times,double*all_positions){

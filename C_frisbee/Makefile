@@ -1,16 +1,24 @@
-EXEC = test.exe
-
-OBJS = glue.o c_frisbee.o rk4.o equations_of_motion.o coefficient_model.o
 
 CC = gcc
-
-CFLAGS =
-
-OFLAGS = -lm
+ifdef ALONE
+ifeq ($(ALONE),yes)
+$(info Building executable)
+OBJS = glue.o driver.o rk4.o equations_of_motion.o coefficient_model.o
+EXEC = test.exe
+CFLAGS = -g
+OFLAGS = 
+endif
+else
+$(info Building shared library)
+OBJS = driver.o rk4.o equations_of_motion.o coefficient_model.o
+EXEC = c_frisbee.so
+CFLAGS = -fPIC
+OFLAGS = -shared
+endif
 
 INCL =
 
-LIBS =
+LIBS = -lm
 
 .SUFFIXES:.c.o
 
@@ -24,4 +32,4 @@ $(EXEC): $(OBJS)
 .PHONY: clean
 
 clean:
-	rm -f $(OBJS) $(EXEC) *~
+	rm -f $(OBJS) $(EXEC) *~ *.exe *.so
