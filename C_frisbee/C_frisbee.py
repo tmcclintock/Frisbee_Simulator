@@ -35,16 +35,15 @@ def get_trajectory(initial_positions,flight_time,N_times,params):
     all_positions = np.zeros(((N+1)*N_times))
 
     #Create pointers for the input arrays
-    initial_positions_in = initial_positions.ctypes.data_as_(POINTER(c_double))
-    params_in = params.ctypes.data_as_(POINTER(c_double))
+    initial_positions_in = initial_positions.ctypes.data_as(POINTER(c_double))
+    params_in = params.ctypes.data_as(POINTER(c_double))
     all_positions_in = all_positions.ctypes.data_as(POINTER(c_double))
 
     #Call the driver
-    driver(intial_positions_in,params_in,flight_time,N_times,all_positions_in)
-    
-    #Get out the times and the positions and re-shape to make it identical
-    #to the output of odeint.
-    #TODO
+    driver(initial_positions_in,params_in,flight_time,N_times,all_positions_in)
+    all_positions = all_positions.reshape((N_times,N+1))
+    times = np.copy(all_positions[:,0])
+    all_positions = np.copy(all_positions[:,1:])
 
     #Return an array of all of the positions at all the times
-    return
+    return times,all_positions

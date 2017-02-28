@@ -89,7 +89,7 @@ for i in xrange(0,nwalkers):
 
 #Run emcee
 sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data,))
-nsteps = 1000
+nsteps = 100
 sampler.run_mcmc(pos,nsteps)
 
 #sys.exit()

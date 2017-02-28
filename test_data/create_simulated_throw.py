@@ -24,7 +24,7 @@ phidot,thetadot,gammadot = 0.0,0.0,50.0
 test_frisbee = frisbee.Frisbee(x,y,z,
                                vx,vy,vz,
                                phi,theta,gamma,
-                               phidot,thetadot,gammadot)
+                               phidot,thetadot,gammadot,use_C=True)
 model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,\
                   -8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
 test_frisbee.initialize_model(model)

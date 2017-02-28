@@ -304,7 +304,7 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
 
   if (t<0.04){
     //printf("t= %f\td6,d7,d11: %f, %f, %f\n",t,derivs[6],derivs[7],derivs[11]);
-    printf("t=%f\td8,d9,d10: %f, %f, %f\n",t,derivs[8],derivs[9],derivs[10]);
+    //printf("t=%f\td8,d9,d10: %f, %f, %f\n",t,derivs[8],derivs[9],derivs[10]);
     //printf("gd = %f\n",gammaDot);
   }
   //End the function
