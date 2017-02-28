@@ -1,5 +1,7 @@
 # executables
 *.exe
+*.o
+*.so
 
 # emacs back-up files and unsaved files
 *~
