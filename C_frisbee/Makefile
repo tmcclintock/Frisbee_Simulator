@@ -1,12 +1,12 @@
 EXEC = test.exe
 
-OBJS = glue.o coefficient_model.o
+OBJS = glue.o equations_of_motion.o coefficient_model.o
 
 CC = gcc
 
-CFLAGS = 
+CFLAGS =
 
-OFLAGS =
+OFLAGS = -lm
 
 INCL =
 
