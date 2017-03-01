@@ -8,8 +8,8 @@
 #define m 0.175 //Frisbee mass; kg
 #define g 9.81  //acceleration due to gravity; m/s/s
 #define Area 0.057 //planform area of a frisbee (top down); m^2
-#define d 0.2694//diameter of frisbee; m
-#define rho 1.23//average density of air; kg/m^3
+#define d 0.269396834 //diameter of frisbee; m
+#define rho 1.225 //average density of air; kg/m^3
 #define Izz 0.002352 //moment of inertia about ZZ; kg*m^2
 #define Ixy 0.001219 //moment of inertia about either XX or YY; kg*m^2
 
@@ -81,13 +81,9 @@ void add(double*A,double *B,double *C){
   return;
 }
 
-void print_vec(double*A){
-  /*Print a vector
-
-    Args:
-        A: a vector
-   */
-  printf("A[0]=%e\tA[1]=%e\tA[2]=%e\tlen=%e\n",A[0],A[1],A[2],sqrt(dot(A,A)));
+void print_vector(double*A){
+  printf("A[0]=%.3e\tA[1]=%.3e\tA[2]=%.3e\n",A[0],A[1],A[2]);
+  //printf("A[0]=%e\tA[1]=%e\tA[2]=%e\tlen=%e\n",A[0],A[1],A[2],sqrt(dot(A,A)));
 }
 
 void equations_of_motion(double*positions,double*derivs,double t,double*params){
@@ -100,7 +96,7 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
 	params: all of the parameters that control the scaling of the forces and torques on the disc. These are the quantities of interest.
    */
   //Declare some temporary variables that may be used
-  double temp1, temp2;
+  double temp;
   int i,j,k;
 
   /*The six coordinates and velocities in the lab frame
@@ -125,8 +121,9 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
 
   //Check if the disc has hit the ground
   if (z <= 0){
-    for(i=0; i<12; i++)
+    for(i=0; i<12; i++){
       derivs[i] = 0;
+    }
     return;
   }
 
@@ -173,12 +170,7 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   cross(C3,vp_hat,ulat);
 
   //Calculate the angle of attack, alpha
-  //This angle is negative since if there is face on the disc 
-  //it should have a positive angle of attack even though vz_C
-  //would be negative.
   double alpha = -atan(v_dot_C3/norm_v_plane);
-  //printf("zbhat = %e, %e, %e\n",C3[0],C3[1],C3[2]);
-  //printf("alpha = %e\tzcomp = %e\tnorm = %e\n\n",alpha,v_dot_C3,norm_v_plane);
 
   //Make copies of some of the arrays, mostly so that it is easier to see what is happening
   double x_C_hat[] = {vp_hat[0],vp_hat[1],vp_hat[2]};
@@ -186,49 +178,36 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   double z_C_hat[] = {C3[0],C3[1],C3[2]};
 
   //Calculate the lift force
-  double aerodynamic_Force_amp = Area*rho*dot(v,v)/2;
+  double aerodynamic_Force_amp = 0.5*rho*Area*dot(v,v);
   double Flift_amp = C_lift(alpha,PL0,PLa)*aerodynamic_Force_amp;
   double Flift[3];
   cross(v_hat,y_C_hat,Flift);
-  //printf("uFl0 = %e\tuFl1 = %e\tuFl2 = %e\n",Flift[0],Flift[1],Flift[2]);
-  //printf("FL_amp = %e\n",C_lift(alpha,PL0,PLa)*aerodynamic_Force_amp);
   Flift[0] = Flift[0]*Flift_amp; Flift[1] = Flift[1]*Flift_amp; Flift[2] = Flift[2]*Flift_amp;
 
   //Calculate the drag force
   double Fdrag_amp = C_drag(alpha,PD0,PDa,alpha0)*aerodynamic_Force_amp;
   double Fdrag[]={-Fdrag_amp*v_hat[0],-Fdrag_amp*v_hat[1],-Fdrag_amp*v_hat[2]};
 
-  //printf("Cl = %e\nC_drag = %e\n",C_lift(alpha,PL0,PLa),C_drag(alpha,PD0,PDa,alpha0));
-  //printf("alpha = %e, PL0 = %e, PLa = %e\n",alpha,PL0,PLa);
-  //printf("Aero_force_amp = %e\n\n",aerodynamic_Force_amp);
-  //printf("Liftamp = %e\nDragamp = %e\n\n",Flift_amp,Fdrag_amp);
-
   //Calculate the gravitational force
   double Fgrav[]={0,0,-m*g};
 
   //Sum the forces to get the total force
-  double Ftot[] = {Flift[0]+Fdrag[0],Flift[1]+Fdrag[1],Flift[2]+Fdrag[2]+Fgrav[2]};
-  //printf("Lift: %e\t%e\t%e\n",Flift[0],Flift[1],Flift[2]);
-  //printf("Drag: %e\t%e\t%e\n",Fdrag[0],Fdrag[1],Fdrag[2]);
-  //printf("Grav: %e\t%e\t%e\n\n",Fgrav[0],Fgrav[1],Fgrav[2]);
+  double Ftot[3];
+  add(Flift,Fdrag,Ftot);
+  add(Ftot,Fgrav,Ftot);
 
   //Write the angular velocities in the frisbee frame
   double w_in_C[] = {phiDot*c_tht, thetaDot, phiDot*s_tht + gammaDot};
 
-  //Calculate the angular velocity in the inertial frame
-  double w_in_N[3];
+  //Calculate the angular velocity in the lab frame
+  double w_in_N[]={0,0,0};
   for(i=0;i<3;i++){
-    temp1 = 0;
-    for(j=0;j<3;j++){//{Tnc}^T dot w_in_C
-      temp1+= Tnc[j][i] * w_in_C[j];
+    for(j=0;j<3;j++){// w_in_C dot Tnc
+      w_in_N[i] +=  w_in_C[j] * Tnc[j][i];
     }
-    w_in_N[i] = temp1;
   }
-  //printf("ang_vel_labframe:%f  %f  %f\n",w_in_N[0],w_in_N[1],w_in_N[2]);
 
   //Find the components of the angular velocity
-  //as expressed in the inertial frame along each of the body frame unit
-  //vectors
   double w_x = dot(w_in_N,x_C_hat);
   double w_y = dot(w_in_N,y_C_hat);
   double w_z = dot(w_in_N,z_C_hat);
@@ -239,41 +218,25 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   double spin_parameter = w_z*d/(2*norm_v);
 
   //Calculate each torque (aka moment)
-  double tau_amp = Area*rho*d*dot(v,v)/2;
+  double tau_amp = 0.5*rho*d*Area*dot(v,v);
   double tau_x_amp = C_x(w_x,w_z,PTxwx,PTxwz)*tau_amp;
   double tau_y_amp = C_y(alpha,w_y,PTy0,PTywy,PTya)*tau_amp;
   double tau_z_amp = C_z(w_z,PTzwz)*tau_amp;
-  //printf("\ntau_amp = %e\n",tau_amp);
-  //printf("tau_x_amp = %e\n",tau_x_amp);
-  //printf("tau_y_amp = %e\n",tau_y_amp);
-  //printf("tau_z_amp = %e\n",tau_z_amp);
 
   double tau_x[] = {x_C_hat[0]*tau_x_amp, x_C_hat[1]*tau_x_amp, x_C_hat[2]*tau_x_amp};
-  //printf("raw taux: %e, %e, %e\n",tau_x[0],tau_x[1],tau_x[2]);
   double tau_y[] = {y_C_hat[0]*tau_y_amp, y_C_hat[1]*tau_y_amp, y_C_hat[2]*tau_y_amp};
-  double tau_z_N[] = {0, 0, tau_z_amp};
-  //Note: tau_x and tau_y are in the body frame, while tau_z is already in N
+  double tau_z_N[] = {0, 0, tau_z_amp}; //Already in the correct frame
 
-  //Calculate tau_x_N and tau_y_N
-  double tau_x_N[3];
-  double tau_y_N[3];
-  for(i=0;i<3;i++){
-    temp1 = 0;
-    temp2 = 0;
-    for(j=0;j<3;j++){//Tnc dot tau_x(y)_body
-      temp1+= Tnc[i][j] * tau_x[j];
-      temp2+= Tnc[i][j] * tau_y[j];
+  //Calculate the total torque
+  double tau_total[]={0,0,0};
+  for(i=0;i<3;i++)
+    {
+      for(j=0;j<3;j++)
+	{//Tnc dot tau_x+y
+	  tau_total[i] += Tnc[i][j] * (tau_x[j] + tau_y[j]);
+	}
     }
-    tau_x_N[i] = temp1;
-    tau_y_N[i] = temp2;
-  }
-  //printf("rot taux: %e, %e, %e\n",tau_x_N[0],tau_x_N[1],tau_x_N[2]);
-
-  //Calculate the total torque (aka moment) in the inertial frame
-  double tau_total[] = {
-    tau_x_N[0]+tau_y_N[0]+tau_z_N[0],
-    tau_x_N[1]+tau_y_N[1]+tau_z_N[1],
-    tau_x_N[2]+tau_y_N[2]+tau_z_N[2]};
+  add(tau_total, tau_z_N, tau_total);
 
   //If we want, set the torques all to 0
   //tau_total[0] = 0, tau_total[1] = 0, tau_total[2] = 0;
@@ -295,25 +258,40 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   derivs[6] = phiDot;
   derivs[7] = thetaDot;
   derivs[8] = gammaDot;
-  derivs[9] = (tau_total[0] 
-		+ 2*Ixy*thetaDot*phiDot*s_tht 
-		- Izz*thetaDot*(phiDot*s_tht+gammaDot)
-		)/(Ixy*c_tht);
+  derivs[9] = (tau_total[0]+2*Ixy*thetaDot*phiDot*s_tht-Izz*thetaDot*(phiDot*s_tht+gammaDot))/(Ixy*c_tht);
+  derivs[10] = (tau_total[1]+Izz*phiDot*c_tht*(phiDot*s_tht+gammaDot)-Ixy*phiDot*phiDot*c_tht*s_tht)/Ixy;
+  derivs[11]= (tau_total[2]-Izz*(phiDot*thetaDot*c_tht + derivs[9]*s_tht))/Izz;
 
-  derivs[10] = (tau_total[1]
-               + Izz*phiDot*c_tht*(phiDot*s_tht+gammaDot)
-               - Ixy*phiDot*phiDot*c_tht*s_tht
-              )/Ixy;
-  derivs[11]= (tau_total[2]
-               - Izz*derivs[8]*s_tht
-               - Izz*thetaDot*phiDot*c_tht
-              )/Izz;
-  //printf("\nt0,t1,t2: %f, %f, %f\n",tau_total[0],tau_total[1],tau_total[2]);
-  //printf("\nd0,d1,d2: %f, %f, %f\n",derivs[0],derivs[1],derivs[2]);
-  //printf("d3,d4,d5: %f, %f, %f\n",derivs[3],derivs[4],derivs[5]);
+  if (t<0.0){
+    printf("\nCCCCC\n\tC_lift = %f\n",C_lift(alpha,PL0,PLa));
+    printf("\tC_drag = %f\n",C_drag(alpha,PD0,PDa,alpha0));
+    printf("\tAero Amplitude = %f\n",aerodynamic_Force_amp);
+    printf("\tF_lift");print_vector(Flift);
+    printf("\tF_drag");print_vector(Fdrag);
+    printf("\tF_grav");print_vector(Fgrav);
+    printf("\tTorque Amplitude = %f\n",tau_amp);
+    printf("\tavf:");print_vector(w_in_C);
+    printf("\tC1:");print_vector(C1);
+    printf("\tC2:");print_vector(C2);
+    printf("\tC3:");print_vector(C3);
+    printf("\tavl:");print_vector(w_in_N);
+    //printf("\txbhat");print_vector(x_C_hat);
+    //printf("\tybhat");print_vector(y_C_hat);
+    //printf("\tzbhat");print_vector(z_C_hat);
+    printf("\twx = %.3e\twy = %.3e\twz = %.3e\n",w_x,w_y,w_z);
+    printf("\tRoll amp = %f\n",tau_x_amp);
+    printf("\tPitch amp = %f\n",tau_y_amp);
+    printf("\tSpin amp = %f\n",tau_z_amp);
+    printf("\ttotal torque");print_vector(tau_total);
+    printf("\tphi_dd: %e\n",2*Ixy*thetaDot*phiDot*s_tht-Izz*thetaDot*(phiDot*s_tht+gammaDot));
+    printf("\ttheta_dd: %e\n",Izz*phiDot*c_tht*(phiDot*s_tht+gammaDot)-Ixy*phiDot*phiDot*c_tht*s_tht);
+    printf("\tgamma_dd: %e\n",-Izz*(phiDot*thetaDot*c_tht + derivs[9]*s_tht));
 
-  if (t<0.04){
-    printf("%f\n",gammaDot);
+    for(i=0;i<12;i++)
+      printf("cderiv[%d] = %f\n",i,derivs[i]);
+    //for(i=0;i<10;i++)
+    //  printf("cparams[%d] = %f\n",i,params[i]);
+
     //printf("t= %f\td6,d7,d11: %f, %f, %f\n",t,derivs[6],derivs[7],derivs[11]);
     //printf("t=%f\td8,d9,d10: %f, %f, %f\n",t,derivs[8],derivs[9],derivs[10]);
     //printf("gd = %f\n",gammaDot);

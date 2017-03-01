@@ -36,7 +36,6 @@ def get_trajectory(initial_positions,flight_time,N_times,params):
 
     #Create pointers for the input arrays
     initial_positions = np.copy(initial_positions)
-    print initial_positions
     initial_positions_in = initial_positions.ctypes.data_as(POINTER(c_double))
     params_in = params.ctypes.data_as(POINTER(c_double))
     all_positions_in = all_positions.ctypes.data_as(POINTER(c_double))
