@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import emcee, corner
 sys.path.insert(0,"../")
 import frisbee
+np.random.seed(56789)
 
 #Read in the trajectory
 trajectory = np.genfromtxt("../test_data/simulated_trajectory.txt")
@@ -28,7 +29,8 @@ N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
 
 #This is for if we only test a few parameters at a time
-true_model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
+true_model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
+
 def get_full_model(params):
     """
     This function converts our 'mini model', or
@@ -56,7 +58,7 @@ def lnlike(params,data):
     test_frisbee = frisbee.Frisbee(x[0],y[0],z[0],
                                    vx,vy,vz,
                                    phi,theta,gamma,
-                                   phidot,thetadot,gammadot)
+                                   phidot,thetadot,gammadot,use_C=False)
     test_frisbee.initialize_model(model)
     times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
     test_trajectory = test_trajectory.T
@@ -89,7 +91,7 @@ for i in xrange(0,nwalkers):
 
 #Run emcee
 sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data,))
-nsteps = 1000
+nsteps = 20000
 sampler.run_mcmc(pos,nsteps)
 
 #sys.exit()

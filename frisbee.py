@@ -8,6 +8,13 @@ in an integrator.
 import numpy as np
 import coefficient_model
 from scipy.integrate import odeint
+import sys, os, inspect
+sys.path.insert(0,os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))+"/C_frisbee/")
+c_frisbee_available = True
+try: import C_frisbee
+except OSError: 
+  print "You must compile the C code if you want to use it. See the README."
+  c_frisbee_available = False
 """
 Constants:
 PI
@@ -34,7 +41,7 @@ F_gravity=mass*g*np.array([0.,0.,-1.])
 class Frisbee(object):
 
   def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma,
-               phidot,thetadot,gammadot,debug=False):
+               phidot,thetadot,gammadot,use_C=False,debug=False):
     """
     Constructor
 
@@ -63,6 +70,7 @@ class Frisbee(object):
     self.phidot=phidot
     self.thetadot=thetadot
     self.gammadot=gammadot
+    self.use_C=use_C
     self.debug=debug
     self.update_data_fields()
     
@@ -84,8 +92,8 @@ class Frisbee(object):
     if len(args) == 1 and isinstance(args[0],np.ndarray):
       self.coefficients=coefficient_model.Model(args[0])
     elif len(args) == 10:
-      PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz = args
-      self.coefficients=coefficient_model.Model(PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz)
+      PL0,PLa,PD0,PDa,PTxwx,PTxwz,PTy0,PTya,PTywy,PTzwz = args
+      self.coefficients=coefficient_model.Model(PL0,PLa,PD0,PDa,PTxwx,PTxwz,PTy0,PTya,PTywy,PTzwz)
     else: raise Exception("Usage error: Model initialized incorrectly.")
     return
 
@@ -237,9 +245,9 @@ class Frisbee(object):
       print "\tC_lift:",C_lift
       print "\tC_drag:",C_drag
       print "\tAmplitude:",force_amplitude
-      print "\tF_lift/m:",F_lift/mass
-      print "\tF_drag/m:",F_drag/mass
-      print "\tF_grav/m:",F_gravity/mass
+      print "\tF_lift:",F_lift
+      print "\tF_drag:",F_drag
+      print "\tF_grav:",F_gravity
     return total_force/mass
 
 
@@ -249,8 +257,8 @@ class Frisbee(object):
     """
     alpha=self.angle_of_attack
     v2=self.v2
-    wxb,wyb,wzb = self.wxb,self.wyb,self.wzb
     torque_amplitude = 0.5*rho*diameter*area*v2
+    wxb,wyb,wzb = self.wxb,self.wyb,self.wzb
     C_x = self.coefficients.C_x(wxb,wzb)
     C_y = self.coefficients.C_y(alpha,wyb)
     C_z = self.coefficients.C_z(wzb)
@@ -264,12 +272,22 @@ class Frisbee(object):
     if self.debug:
       print "In get_torque"
       print "\tAmplitude:",torque_amplitude
+      xbhat,ybhat,zbhat = self.xbhat,self.ybhat,self.zbhat
+      avf = self.angular_velocity_frisframe
+      avl = self.angular_velocity_labframe
+      R = self.rotation_matrix
+      print "\tavf: ",avf
+      print "\tC1:",R[0]
+      print "\tC2:",R[1]
+      print "\tC3:",R[2]
+      print "\tavl: ",avl
+      print "\txbhat = ",xbhat
+      print "\tybhat = ",ybhat
+      print "\tzbhat = ",zbhat
+      print "\twx = %.2e\twy = %.2e\twz = %.2e"%(wxb,wyb,wzb)
       print "\tRoll amp:",C_x*torque_amplitude
       print "\tPitch amp:",C_y*torque_amplitude
       print "\tSpin amp:",C_z*torque_amplitude
-      print "\tRaw moments:",C_x,C_y,C_z
-      print "\tLab moments:",np.dot(self.rotation_matrix,C_x)
-      print "\t",np.dot(self.rotation_matrix,C_y)
       print "\ttotal_torque:",total_torque
     return total_torque
 
@@ -290,9 +308,9 @@ class Frisbee(object):
 
     if self.debug:
       print "In ang_acceleration:"
-      print "\tphi_dd:",total_torque[0],2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
-      print "\ttheta_dd:",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot),Ixy*phidot**2*ct*st
-      print "\tgamma_dd:",total_torque[2],-Izz*(phidot*thetadot*ct+phi_dd*st)
+      print "\tphi_dd:",2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
+      print "\ttheta_dd:",Izz*phidot*ct*(phidot*st+gammadot),Ixy*phidot**2*ct*st
+      print "\tgamma_dd:",-Izz*(phidot*thetadot*ct+phi_dd*st)
     return np.array([phi_dd,theta_dd,gamma_dd])
 
 
@@ -321,7 +339,7 @@ class Frisbee(object):
     """
     self.update_coordinates(coordinates)
     if self.z <= 0.0: return np.zeros_like(coordinates)
-    return self.derivatives_array()
+    return  self.derivatives_array()
 
   def get_trajectory(self,time_initial,time_final,dt=0.01):
     """
@@ -330,9 +348,15 @@ class Frisbee(object):
     This requires that the frisbee hass been properly
     initialized with a model.
     """
-    N_times = int((time_final-time_initial)/dt)
-    times = np.linspace(time_initial,time_final,N_times)
     coordinates = self.get_coordinates()
+    flight_time = time_final-time_initial
+    N_times = int(flight_time/dt)
+    if self.use_C:
+      if c_frisbee_available:
+        return C_frisbee.get_trajectory(coordinates, flight_time, N_times, self.coefficients.get_model_as_array())
+      else: raise Exception("Attempted to use C_frisbee without compiling.")
+    times = np.linspace(time_initial,time_final,N_times)
+
     return times,odeint(self.equations_of_motion,coordinates,times)
     
 
@@ -347,7 +371,7 @@ if __name__ == "__main__":
                          vx,vy,vz,
                          phi,theta,gamma,
                          phidot,thetadot,gammadot,debug=True)
-  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5)
+  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5)
   print test_frisbee
   test_frisbee.derivatives_array()
   print "\n"
@@ -357,8 +381,8 @@ if __name__ == "__main__":
   test_frisbee = Frisbee(x,y,z,
                          vx,vy,vz,
                          phi,theta,gamma,
-                         phidot,thetadot,gammadot,debug=False)
-  model = np.array([0.33,1.9,0.18,0.69,0.43,-1.4e-2,-8.2e-2,-1.2e-2,-1.7e-3,-3.4e-5])
+                         phidot,thetadot,gammadot,use_C=False,debug=False)
+  model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
   test_frisbee.initialize_model(model)
   times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
   print "Integrating the equations of motion at 30 time steps gives"

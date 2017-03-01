@@ -24,15 +24,15 @@ class Model(object):
                 PLa: linear lift parameter that multiplies angle of attack
                 PD0: drag parameter at alpha_0
                 PDa: quadratic drag parameter, multiplies square angle of attack
+                PTxwx: x-axis torque parameter linear in x-axis angular velocity
+                PTxwz: x-axis torque parameter linear in z-axis angular velocity
                 PTy0: y-axis torque parameter (pitch) at alpha = 0
                 PTya: y-axis torque parameter linear in alpha
                 PTywy: y-axis torque parameter linear in y-axis angular velocity
-                PTxwx: x-axis torque parameter linear in x-axis angular velocity
-                PTxwz: x-axis torque parameter linear in z-axis angular velocity
                 PTzwz: z-axis torque parameter linear in z-axis angular velocity
                 """
                 if isinstance(args[0],numpy.ndarray): args = args[0]
-                PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz=args
+                PL0,PLa,PD0,PDa,PTxwx,PTxwz,PTy0,PTya,PTywy,PTzwz=args
 		self.PL0=PL0 
 		self.PLa=PLa 
 		self.PD0=PD0 
