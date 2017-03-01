@@ -9,3 +9,7 @@ Compilation
 To compile the shared library used in the Python code, just type `make`. 
 
 If, for whatever reason, you want to compile the code so that you can fiddle with the `main()` in `glue.c` then you can compile with `make Alone=yes`. This won't make a shared library available for use in Python.
+
+Usage
+=====
+To use the fast version, when you initialize the frisbee object, simply set `use_C=True`.
