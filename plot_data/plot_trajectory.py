@@ -7,7 +7,7 @@ def update_line(num, data, line):
     line.set_data(data[..., :num])
     return line,
 
-trajectory=np.loadtxt("simulated_trajectory_300FPS,mod1.txt")
+trajectory=np.loadtxt("sample_throw.txt")
 
 x = trajectory[:,0]
 y = trajectory[:,1]
@@ -19,8 +19,8 @@ fig = plt.figure()
 ax = fig.add_subplot(111,projection='3d')
 
 line = ax.plot(x, y ,z)
-shadow_1 = ax.plot(zeros, y, z)
-shadow_2 = ax.plot(x, zeros, z)
+#shadow_1 = ax.plot(zeros, y, z)
+#shadow_2 = ax.plot(x, zeros, z)
 
 #plt.plot(x,y,z)
 plt.show()

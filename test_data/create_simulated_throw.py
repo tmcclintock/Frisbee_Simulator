@@ -15,9 +15,9 @@ N_times = int((time_final-time_initial)/0.003333) #300 FPS
 times = np.linspace(time_initial,time_final,N_times)
 
 #The initial conditions
-x,y,z = 0.0, 0.0, 1.0
-vx,vy,vz = 10.0,0.0,0.0
-phi,theta,gamma = 0.0,0.0,0.0
+x,y,z = 0.0, 0.0, 0.5
+vx,vy,vz = 5.0,0.0,1.5
+phi,theta,gamma = 0.25,0.25,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0
 
 #The frisbee
@@ -46,6 +46,6 @@ plt.clf()
 
 #Save it
 outputs = np.array([times,x,y,z,err,err,err]).T
-outputs = outputs[0::10] #Take only every ten
+outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
-np.savetxt("simulated_trajectory.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
+np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
