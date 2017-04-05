@@ -1,5 +1,6 @@
 """
-Compare the output of getting the trajectory from the C code with the python code.
+Compare the output of getting the trajectory from the C code 
+with the python code.
 """
 import sys
 sys.path.insert(0,"../")

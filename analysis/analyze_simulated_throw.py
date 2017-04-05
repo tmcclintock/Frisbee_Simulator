@@ -58,7 +58,7 @@ def lnlike(params,data):
     test_frisbee = frisbee.Frisbee(x[0],y[0],z[0],
                                    vx,vy,vz,
                                    phi,theta,gamma,
-                                   phidot,thetadot,gammadot,use_C=False)
+                                   phidot,thetadot,gammadot,use_C=True)
     test_frisbee.initialize_model(model)
     times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
     test_trajectory = test_trajectory.T

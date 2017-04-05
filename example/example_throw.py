@@ -13,27 +13,25 @@ time_initial = 0.0
 time_final = 3.0
 N_times = int((time_final-time_initial)/0.003333) #300 FPS
 times = np.linspace(time_initial,time_final,N_times)
+dt = times[1]-times[0]
 
 #The initial conditions
-x,y,z = 0.0, 0.0, 0.5
-vx,vy,vz = 5.0,0.0,1.5
-phi,theta,gamma = 0.25,0.25,0.0
+x,y,z = 0.0, 0.0, 1.0
+vx,vy,vz = 10.0,0.0,0.0
+phi,theta,gamma = 0.0,-0.25,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0
 
 #The frisbee
 test_frisbee = frisbee.Frisbee(x,y,z,
                                vx,vy,vz,
                                phi,theta,gamma,
-                               phidot,thetadot,gammadot)
+                               phidot,thetadot,gammadot,
+                               use_C=True)
 model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
 test_frisbee.initialize_model(model)
-coordinates = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,\
-                        phidot,thetadot,gammadot])
-
-#Integrate it
-trajectory = odeint(test_frisbee.equations_of_motion,coordinates,times)
-x,y,z = trajectory[:,:3].T
-err = np.ones_like(x)*0.05 #5 centimeters
+times, trajectory = test_frisbee.get_trajectory(time_initial, time_final, dt=dt)
+print trajectory.shape
+x,y,z = trajectory.T[:3]
 
 #Plot it
 import matplotlib.pyplot as plt
@@ -45,6 +43,7 @@ plt.show()
 plt.clf()
 
 #Save it
+err = np.ones_like(x) * 0.05 #5 centimeter error
 outputs = np.array([times,x,y,z,err,err,err]).T
 outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z

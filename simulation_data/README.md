@@ -1,0 +1,1 @@
+In this directory we create a simulated throw that we use to test the analysis code found in ../analysis.
