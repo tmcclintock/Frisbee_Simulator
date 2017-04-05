@@ -1,3 +1,8 @@
+#Figures
+*.png
+*.jpg
+*.gif
+
 # executables
 *.exe
 *.o
