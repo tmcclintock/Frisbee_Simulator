@@ -39,7 +39,7 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111,projection='3d')
 plt.plot(x,y,z)
-plt.show()
+#plt.show()
 plt.clf()
 
 #Save it
@@ -48,3 +48,7 @@ outputs = np.array([times,x,y,z,err,err,err]).T
 outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
 np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
+
+#Now save the full trajectory
+fulloutputs = np.vstack((times,trajectory.T)).T
+np.savetxt("full_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
