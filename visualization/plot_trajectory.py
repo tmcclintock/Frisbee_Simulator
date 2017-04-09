@@ -39,9 +39,9 @@ lines = [line,wall_shadow,ground_shadow]
 
 print len(x)," frames in the animation"
 print "This will take %f milliseconds"%(len(x)*0.5)
-anim = animation.FuncAnimation(fig, update_lines, frames=len(x), fargs=(dataLines, lines), interval=50, blit=False)
+anim = animation.FuncAnimation(fig, update_lines, frames=len(x), fargs=(dataLines, lines), interval=5, blit=True)
 
-anim.save('line.gif', dpi=80, writer='imagemagick')
+anim.save('line.gif', dpi=80, writer='imagemagick', fps=60)
 
 plt.show()
 plt.clf()
