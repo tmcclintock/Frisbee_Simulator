@@ -51,4 +51,5 @@ np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err
 
 #Now save the full trajectory
 fulloutputs = np.vstack((times,trajectory.T)).T
+fulloutputs = fulloutputs[fulloutputs[:,3]>0,:] #Take only entries with +z
 np.savetxt("full_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
