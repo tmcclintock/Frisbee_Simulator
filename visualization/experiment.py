@@ -14,6 +14,18 @@ import matplotlib.animation as animation
 from matplotlib import gridspec
 
 def update_lines(num, dataLines, lines):
+    """
+    #template for lines:
+    for i in range(len(lines)):
+    line = lines[i]
+    data = dataLines[i]
+    switch(i):
+    case 0: 3D line
+    case 1: polar plot
+    case 2: 2D line
+    return lines
+    """
+
     #Each dataLine is a 3xnum array
     #lines contains the matplotlib line objects
     for line, data in zip(lines, dataLines):
