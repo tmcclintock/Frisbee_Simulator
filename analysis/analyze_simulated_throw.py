@@ -13,7 +13,7 @@ import frisbee
 np.random.seed(56789)
 
 #Read in the trajectory
-trajectory = np.genfromtxt("../test_data/simulated_trajectory.txt")
+trajectory = np.genfromtxt("../simulation_data/sample_throw.txt")
 t,x,y,z,xe,ye,ze = trajectory.T
 data = np.array([t,x,y,z,xe,ye,ze])
 
@@ -38,17 +38,18 @@ def get_full_model(params):
     with all the parameters. Must be changed by
     hand when more parameters are looked at.
     """
-    PL0 = params[0]
+    PD0, PDa = params[0:2]
     model = true_model.copy()
-    model[0] = PL0
+    model[2:4] = PD0, PDa
     return model
 
 #The prior
 def lnprior(params):
-    PL0 = params[0]
+    PD0, PDa  = params[0:2]
     #if PL0 < 0.0: return -np.inf
-    #Flat priors with a cutoff at |1|
-    if any([np.fabs(params)>=1.0]): return -np.inf
+    #Flat priors with a cutoff at |1| or |10|, depending on parameter
+    #if any([np.fabs(params)>=1.0]): return -np.inf
+    if np.fabs(PD0) >= 1.0 or np.fabs(PDa) >= 1.0: return -np.inf
     return 0
 
 #The likelihood
@@ -81,10 +82,10 @@ def lnpost(params,data):
     return lp + lnlike(params,data)
 
 #Set up the walkers in parameter space
-test_params = [0.33] #PL0
+test_params = [0.18,0.69] #PD0, PDa
 print lnpost(test_params,data)
-nwalkers = 2
-ndim = 1
+nwalkers = 4
+ndim = 2
 pos = np.zeros((nwalkers,ndim))
 for i in xrange(0,nwalkers):
     pos[i] = test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim)
@@ -99,6 +100,6 @@ sampler.run_mcmc(pos,nsteps)
 fullchain = sampler.chain.reshape((-1,ndim))
 nburn = 0
 chain = fullchain[int(nburn):]
-np.savetxt("fullchain.txt",fullchain)
+np.savetxt("Final_PD0,PDa_nsteps=20,000_nwalkers=4.txt",fullchain)
 fig = corner.corner(chain)
 plt.show()
