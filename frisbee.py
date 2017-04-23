@@ -84,10 +84,10 @@ class Frisbee(object):
     return outstr
 
 
-  def initialize_model(self,*args):#PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
-    """
-    Used to create a model for the forces and
-    torques on this frisbee.
+  def initialize_model(self,*args):
+    """Used to create a model for the forces and torques on this frisbee.
+    
+    Note: order of parameters: PL0,PLa,PD0,PDa,PTya,PTywy,PTy0,PTxwx,PTxwz,PTzwz):
     """
     if len(args) == 1 and isinstance(args[0],np.ndarray):
       self.coefficients=coefficient_model.Model(args[0])
@@ -98,8 +98,7 @@ class Frisbee(object):
     return
 
   def update_coordinates(self,coordinates):
-    """
-    Given some new coordinates, update the coordinates
+    """Given some new coordinates, update the coordinates
     """
     x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot = coordinates
     self.x=x 
@@ -119,8 +118,7 @@ class Frisbee(object):
 
 
   def get_coordinates(self):
-    """
-    Return the current coordinates of the frisbee.
+    """Return the current coordinates of the frisbee.
     """
     return np.array([self.x,self.y,self.z,self.vx,self.vy,self.vz,
                      self.phi,self.theta,self.gamma,
@@ -128,8 +126,7 @@ class Frisbee(object):
 
 
   def update_data_fields(self):
-    """
-    Update the data fields in the frisbee.
+    """Update the data fields in the frisbee.
     """
     self.calc_trig_functions()
     self.velocity = np.array([self.vx,self.vy,self.vz])
@@ -146,9 +143,7 @@ class Frisbee(object):
 
 
   def calc_trig_functions(self):
-    """
-    Calculates the trig functions
-    of the euler angles of the frisbee.
+    """Calculates the trig functions of the euler angles of the frisbee.
     """
     self.sin_phi = np.sin(self.phi)
     self.cos_phi = np.cos(self.phi)
@@ -158,8 +153,7 @@ class Frisbee(object):
 
 
   def calc_rotation_matrix(self):
-    """
-    Calculates the euler rotation matrix.
+    """Calculates the euler rotation matrix.
     R(phi,theta) = Ry(theta)Rx(phi)
     
     See https://en.wikipedia.org/wiki/Davenport_chained_rotations. 
@@ -172,10 +166,7 @@ class Frisbee(object):
 
 
   def calc_body_hat_vectors(self):
-    """
-    Calculates the unit (hat) vectors
-    fixed to the disc (excluding spin)
-    in terms of the lab frame.
+    """Calculates the unit (hat) vectors fixed to the disc (excluding spin) in terms of the lab frame.
     """
     v = self.velocity
     zbhat = self.rotation_matrix[2]
@@ -187,11 +178,7 @@ class Frisbee(object):
 
 
   def calc_angle_of_attack(self):
-    """
-    Calculates angle of attack (AOA).
-
-    AOA is defined as between plane of the disc
-    and the velocity vector.
+    """Calculates angle of attack (AOA). AOA is defined as between plane of the disc and the velocity vector.
     """
     v = self.velocity
     zbhat = self.zbhat
@@ -201,13 +188,9 @@ class Frisbee(object):
 
 
   def calc_angular_velocity_frisframe(self):
-    """
-    Calculates the angular velocity as seen in the
-    frisbee frame. This is \vec{w}, not \vec{w}_F.
-    See Hummel 2003 page 34.
+    """Calculates the angular velocity as seen in the frisbee frame. This is \vec{w}, not \vec{w}_F. See Hummel 2003 page 34.
 
-    Note: \vec{w} \dot R gives the angular
-    velocity in the lab frame.
+    Note: \vec{w} \dot R gives the angular velocity in the lab frame.
     """
     st,ct = self.sin_theta,self.cos_theta
     return np.array([self.phidot*ct,
@@ -216,9 +199,7 @@ class Frisbee(object):
 
 
   def calc_angular_velocity(self):
-    """
-    Calculates the angular velocity along the
-    body unit vectors as expressed in the lab frame.
+    """Calculates the angular velocity along the body unit vectors as expressed in the lab frame.
     """
     av_labframe = self.angular_velocity_labframe
     xbhat,ybhat,zbhat = self.xbhat,self.ybhat,self.zbhat
@@ -229,8 +210,7 @@ class Frisbee(object):
 
 
   def get_acceleration(self):
-    """
-    Calculate acceleration of the positions.
+    """Calculate acceleration of the positions.
     """
     alpha,v2 = self.angle_of_attack,self.v2
     vhat,ybhat = self.vhat,self.ybhat
@@ -252,8 +232,7 @@ class Frisbee(object):
 
 
   def get_torque(self):
-    """
-    Calculates the torques (moments) on the frisbee.
+    """Calculates the torques (moments) on the frisbee.
     """
     alpha=self.angle_of_attack
     v2=self.v2
@@ -293,19 +272,14 @@ class Frisbee(object):
 
 
   def ang_acceleration(self):
-    """
-    Calculate angular accelerations in radians/s^2.
-    
-    See, e.g. Hummel 2003.
+    """Calculate angular accelerations in radians/s^2. See, e.g. Hummel 2003.
     """
     total_torque = self.get_torque()
     st,ct = self.sin_theta,self.cos_theta
     phidot,thetadot,gammadot = self.phidot,self.thetadot,self.gammadot
-
     phi_dd = (total_torque[0]+2*Ixy*thetadot*phidot*st-Izz*thetadot*(phidot*st+gammadot))/(ct*Ixy)
     theta_dd = (total_torque[1]+Izz*phidot*ct*(phidot*st+gammadot)-Ixy*phidot*phidot*ct*st)/Ixy
     gamma_dd = (total_torque[2]-Izz*(phidot*thetadot*ct+phi_dd*st))/Izz
-
     if self.debug:
       print "In ang_acceleration:"
       print "\tphi_dd:",2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
@@ -315,8 +289,7 @@ class Frisbee(object):
 
 
   def derivatives_array(self):
-    """
-    Compute the derivatives of all coordinates.
+    """Compute the derivatives of all coordinates.
     """
     derivatives = np.zeros(12)
     derivatives[0:3] = self.velocity
@@ -333,20 +306,14 @@ class Frisbee(object):
 
 
   def equations_of_motion(self,coordinates,t):
-    """
-    Return the equations of motion.
-    For use with scipy integrators.
+    """Return the equations of motion. For use with scipy integrators.
     """
     self.update_coordinates(coordinates)
     if self.z <= 0.0: return np.zeros_like(coordinates)
     return  self.derivatives_array()
 
   def get_trajectory(self,time_initial,time_final,dt=0.01):
-    """
-    Get a frisbee's trajectory give an initial
-    and final time. The timestep size can be specified.
-    This requires that the frisbee hass been properly
-    initialized with a model.
+    """Get a frisbee's trajectory give an initial and final time. The timestep size can be specified. This requires that the frisbee hass been properly initialized with a model.
     """
     coordinates = self.get_coordinates()
     flight_time = time_final-time_initial
@@ -371,7 +338,8 @@ if __name__ == "__main__":
                          vx,vy,vz,
                          phi,theta,gamma,
                          phidot,thetadot,gammadot,debug=True)
-  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5)
+  test_frisbee.initialize_model(0.33,1.9,0.18,0.69,-1.3e-2,
+                                -1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5)
   print test_frisbee
   test_frisbee.derivatives_array()
   print "\n"
@@ -382,7 +350,8 @@ if __name__ == "__main__":
                          vx,vy,vz,
                          phi,theta,gamma,
                          phidot,thetadot,gammadot,use_C=False,debug=False)
-  model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
+  model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,
+                    -1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
   test_frisbee.initialize_model(model)
   times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
   print "Integrating the equations of motion at 30 time steps gives"
