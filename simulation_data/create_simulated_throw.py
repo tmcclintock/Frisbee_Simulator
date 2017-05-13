@@ -31,20 +31,26 @@ model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-
 test_frisbee.initialize_model(model)
 times, trajectory = test_frisbee.get_trajectory(time_initial, time_final, dt=dt)
 print trajectory.shape
-x,y,z = trajectory.T[:3]
+x, y, z = trajectory.T[:3]
 
-#Plot it
+#Create another throw with 5 cm scatter in each direction
+xs = x + 0.05*np.random.randn(len(x))
+ys = y + 0.05*np.random.randn(len(x))
+zs = z + 0.05*np.random.randn(len(x))
+
+#Plot it and the scattered throw
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111,projection='3d')
-plt.plot(x,y,z)
-#plt.show()
+plt.plot(x, y, z)
+plt.plot(xs, ys, zs, alpha=0.5)
+plt.show()
 plt.clf()
 
 #Save it
 err = np.ones_like(x) * 0.05 #5 centimeter error
-outputs = np.array([times,x,y,z,err,err,err]).T
+outputs = np.array([times, x, y, z, err, err, err]).T
 outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
 np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
