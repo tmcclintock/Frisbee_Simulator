@@ -53,9 +53,9 @@ err = np.ones_like(x) * 0.05 #5 centimeter error
 outputs = np.array([times, x, y, z, err, err, err]).T
 outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
-np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
+#np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
 
 #Now save the full trajectory
 fulloutputs = np.vstack((times,trajectory.T)).T
 fulloutputs = fulloutputs[fulloutputs[:,3]>0,:] #Take only entries with +z
-np.savetxt("simulated_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
+#np.savetxt("simulated_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
