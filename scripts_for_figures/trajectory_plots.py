@@ -13,8 +13,6 @@ xs = x + np.random.randn(len(x))*0.05
 ys = y + np.random.randn(len(y))*0.05
 zs = z + np.random.randn(len(z))*0.05
 
-
-
 def traj_2D():
     ds = 10
     plt.plot(x, z, c='b')
@@ -23,6 +21,16 @@ def traj_2D():
     plt.ylabel(r"$z\ {\rm displacement}\ [{\rm m}]$")
     plt.subplots_adjust(bottom=0.17, left=0.15)
     plt.gcf().savefig("figures/xz_scatter.pdf")
+    plt.show()
+
+def traj_2D_with_err():
+    ds = 10
+    plt.plot(x, z, c='b')
+    plt.errorbar(xs[::ds], zs[::ds], xerr=xe[::ds], yerr=ze[::ds], zorder=-1, c='k', ls='')
+    plt.xlabel(r"$x\ {\rm displacement}\ [{\rm m}]$")
+    plt.ylabel(r"$z\ {\rm displacement}\ [{\rm m}]$")
+    plt.subplots_adjust(bottom=0.17, left=0.15)
+    plt.gcf().savefig("figures/xz_scatter_error.pdf")
     plt.show()
 
 def traj_3D():
@@ -40,4 +48,5 @@ def traj_3D():
 
 if __name__ == "__main__":
     traj_2D()
+    traj_2D_with_err()
     traj_3D()

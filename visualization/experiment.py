@@ -73,11 +73,12 @@ ax0.set_zlabel(r"${\rm Z\ [m] }$")
 #While the 3D plot contains the trajectory,
 #these extra plots can contain the pitch and roll angles, updated
 #along with the trajectory
+title_loc = 0.98
 ax1 = plt.subplot(gs[0,2], projection='polar')
 philine = ax1.plot([phi[0],phi[0]+np.pi], [1,1])[0]
 ax1.set_rmax(1)
 ax1.set_rticks([])
-ax1.set_title(r"${\rm Left\ Right}$")
+ax1.set_title(r"${\rm Left-Right}$",y=title_loc)
 ax1.set_xticklabels([])
 
 ax2 = plt.subplot(gs[1,2], projection='polar')
@@ -85,12 +86,13 @@ thetaline = ax2.plot([theta[0],theta[0]+np.pi],[1,1])[0]
 ax2.set_rmax(1)
 ax2.set_rticks([])
 ax2.set_xticklabels([])
-ax2.set_title(r"${\rm Front\ Back}$")
+ax2.set_title(r"${\rm Front-Back}$",y=title_loc)
 
 ax3 = plt.subplot(gs[2,2])
 gammadline = ax3.plot(times, gammad)[0]
 ax3.set_ylabel(r"${\rm Spin}$ $[rad/s]$")
 ax3.set_xlabel(r"${\rm Time}$ $[s]$")
+ax3.set_title(r"${\rm Rotation\ Rate}$",y=title_loc)
 
 
 dataLines = [[x, y, z], [x, zeros+max(y), z], [x, y, zeros], [phi], [theta], [times, gammad]]
