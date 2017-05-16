@@ -324,7 +324,7 @@ class Frisbee(object):
       else: raise Exception("Attempted to use C_frisbee without compiling.")
     times = np.linspace(time_initial,time_final,N_times)
 
-    return times,odeint(self.equations_of_motion,coordinates,times)
+    return times, odeint(self.equations_of_motion,coordinates,times)
     
 
 #An example of initializing, printing, and calling a function of the frisbee

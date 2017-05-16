@@ -1,40 +1,41 @@
 """
-This analyzes the simulated throw.
-This mirrors how the analysis will look when
-it is run on real data.
+This contains the functions to analyze a flight.
+
+Note: this version assumes that we know the initial conditions perfectly.
+In reality these should be fit as parameters.
 """
-import os, sys
+import sys
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
-import matplotlib.pyplot as plt
-import emcee, corner
+import emcee
 sys.path.insert(0,"../")
 import frisbee
-np.random.seed(56789)
 
 #Define what parameters to look at
 #Use this string to go from the minimodel to the full model
 #NOT IMPLEMENTED YET
-param_names = "PL0 PLa PD0 PDa"
+param_names = ["PD0","PDa"]
 
-#Read in the trajectory
-trajectory = np.genfromtxt("../simulation_data/sample_throw.txt")
-t,x,y,z,xe,ye,ze = trajectory.T
-data = np.array([t,x,y,z,xe,ye,ze])
+#Read in the trajectory 
+data = np.genfromtxt("../simulation_data/sample_throw.txt", unpack=True)
 
 #True starting condtions of kinematic variables we don't test
-vx,vy,vz = 10.0,0.0,0.0
-phi,theta,gamma = 0.0,0.0,0.0
-phidot,thetadot,gammadot = 0.0,0.0,50.0 #radians/sec
+xi, yi, zi                 = data[1:4, 0] #meters
+vxi, vyi, vzi              = 10.0, 0.0, 0.0 #m/s
+phi, theta, gamma          = 0.0, -0.25, 0.0 #radians
+phidot, thetadot, gammadot = 0.0, 0.0, 50.0 #rad/sec
 
 #Figure out everything about the times that we will integrate over
 #when we model the throw.
+t = data[0, :]
 time_initial = t[0]
 time_final = t[-1]*1.01 #Go a little higher
 N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
 
 #This is for if we only test a few parameters at a time
+#true_model = {"PL0":0.33,
+#              "PLa":1.9} #in progress
 true_model = np.array([0.33, 1.9, #PL
                        0.18, 0.69, #PD
                        -1.3e-2, -1.7e-3, #Px
@@ -68,50 +69,49 @@ def lnprior(params):
 def lnlike(params,data):
     model = get_full_model(params)
     t,x,y,z,x_err,y_err,z_err = data
-    test_frisbee = frisbee.Frisbee(x[0],y[0],z[0],
-                                   vx,vy,vz,
-                                   phi,theta,gamma,
-                                   phidot,thetadot,gammadot,use_C=True)
+    test_frisbee = frisbee.Frisbee(xi, yi, zi,
+                                   vxi, vyi, vzi,
+                                   phi, theta, gamma,
+                                   phidot, thetadot, gammadot,
+                                   use_C=True)
     test_frisbee.initialize_model(model)
-    times,test_trajectory = test_frisbee.get_trajectory(time_initial,time_final)
-    test_trajectory = test_trajectory.T
-    x_test,y_test,z_test = test_trajectory[:3]
-    x_spline = IUS(times,x_test)
-    y_spline = IUS(times,y_test)
-    z_spline = IUS(times,z_test)
-    xchi2 = -0.5*sum((x-x_spline(t))**2/(x_err**2))
-    ychi2 = -0.5*sum((y-y_spline(t))**2/(y_err**2))
-    zchi2 = -0.5*sum((z-z_spline(t))**2/(z_err**2))
-
-    #print params,test_trajectory[:3,-1]
-    #print params,xchi2,ychi2,zchi2
+    times, test_trajectory = test_frisbee.get_trajectory(time_initial, time_final)
+    x_test, y_test, z_test = test_trajectory.T[:3]
+    x_spline = IUS(times, x_test)
+    y_spline = IUS(times, y_test)
+    z_spline = IUS(times, z_test)
+    xchi2 = -0.5*sum((x-x_spline(t))**2/x_err**2)
+    ychi2 = -0.5*sum((y-y_spline(t))**2/y_err**2)
+    zchi2 = -0.5*sum((z-z_spline(t))**2/z_err**2)
     return xchi2 + ychi2 + zchi2
 
 #The posterior
-def lnpost(params,data):
+def lnprob(params,data):
     lp = lnprior(params)
     if not np.isfinite(lp): return -np.inf
-    return lp + lnlike(params,data)
+    return lp + lnlike(params, data)
 
-#Set up the walkers in parameter space
-test_params = [0.18,0.69] #PD0, PDa
-print lnpost(test_params,data)
-nwalkers = 4
-ndim = 2
-pos = np.zeros((nwalkers,ndim))
-for i in xrange(0,nwalkers):
-    pos[i] = test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim)
+#An EXAMPLE of how to run the analysis functions.
+if __name__ == "__main__":
+    #Set up the walkers in parameter space with true positions
+    test_params = [0.18, 0.69] #PD0, PDa true positions
 
-#Run emcee
-sampler = emcee.EnsembleSampler(nwalkers,ndim,lnpost,args=(data,))
-nsteps = 20000
-sampler.run_mcmc(pos,nsteps)
-
-#sys.exit()
-
-fullchain = sampler.chain.reshape((-1,ndim))
-nburn = 0
-chain = fullchain[int(nburn):]
-np.savetxt("Final_PD0,PDa_nsteps=20,000_nwalkers=4.txt",fullchain)
-fig = corner.corner(chain)
-plt.show()
+    nwalkers = 4
+    ndim = 2
+    nsteps = 1000
+    pos = [test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim) 
+           for i in range(nwalkers)]
+    print "Starting MCMC for the model:",param_names
+    print "\tnsteps:%d nwalkers:%d"%(nsteps, nwalkers)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data,))
+    sampler.run_mcmc(pos,nsteps)
+    print "MCMC complete for the model:",param_names
+    
+    fullchain = sampler.flatchain
+    chainpath = "chains/%s_chain.txt"%"".join(param_names)
+    np.savetxt(chainpath, fullchain)
+    print "Chain saved at %s"%chainpath
+    import matplotlib.pyplot as plt
+    import corner
+    corner.corner(fullchain)
+    plt.show()
