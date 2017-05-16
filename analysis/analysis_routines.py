@@ -12,8 +12,6 @@ sys.path.insert(0,"../")
 import frisbee
 
 #Define what parameters to look at
-#Use this string to go from the minimodel to the full model
-#NOT IMPLEMENTED YET
 param_names = ["PD0","PDa"]
 
 #Read in the trajectory 
@@ -34,8 +32,6 @@ N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
 
 #This is for if we only test a few parameters at a time
-#true_model = {"PL0":0.33,
-#              "PLa":1.9} #in progress
 true_model = np.array([0.33, 1.9, #PL
                        0.18, 0.69, #PD
                        -1.3e-2, -1.7e-3, #Px
@@ -48,11 +44,8 @@ def get_full_model(params):
     just a few parameters, to the full model
     with all the parameters. Must be changed by
     hand when more parameters are looked at.
-    TODO: implement a way to use the param_names string
-    to make the choice automatic.
     """
     PD0, PDa = params[0:2]
-    model = true_model.copy()
     model[2:4] = PD0, PDa
     return model
 

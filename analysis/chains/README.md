@@ -1,0 +1,1 @@
+This folder contains chains, but they are never uploaded to the repository.

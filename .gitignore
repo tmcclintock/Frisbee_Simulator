@@ -1,3 +1,6 @@
+#Chains
+analysis/chains/*.txt
+
 #Figures
 *pdf
 *.png
