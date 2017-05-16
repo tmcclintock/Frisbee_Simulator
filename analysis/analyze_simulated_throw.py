@@ -12,6 +12,11 @@ sys.path.insert(0,"../")
 import frisbee
 np.random.seed(56789)
 
+#Define what parameters to look at
+#Use this string to go from the minimodel to the full model
+#NOT IMPLEMENTED YET
+param_names = "PL0 PLa PD0 PDa"
+
 #Read in the trajectory
 trajectory = np.genfromtxt("../simulation_data/sample_throw.txt")
 t,x,y,z,xe,ye,ze = trajectory.T
@@ -22,14 +27,19 @@ vx,vy,vz = 10.0,0.0,0.0
 phi,theta,gamma = 0.0,0.0,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0 #radians/sec
 
-#Times
+#Figure out everything about the times that we will integrate over
+#when we model the throw.
 time_initial = t[0]
 time_final = t[-1]*1.01 #Go a little higher
 N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
 
 #This is for if we only test a few parameters at a time
-true_model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,-1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
+true_model = np.array([0.33, 1.9, #PL
+                       0.18, 0.69, #PD
+                       -1.3e-2, -1.7e-3, #Px
+                       -8.2e-2, 0.43, -1.4e-2, #Py
+                       -3.4e-5]) #Pz
 
 def get_full_model(params):
     """
@@ -37,6 +47,8 @@ def get_full_model(params):
     just a few parameters, to the full model
     with all the parameters. Must be changed by
     hand when more parameters are looked at.
+    TODO: implement a way to use the param_names string
+    to make the choice automatic.
     """
     PD0, PDa = params[0:2]
     model = true_model.copy()
