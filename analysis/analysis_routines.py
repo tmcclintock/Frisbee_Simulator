@@ -7,7 +7,6 @@ In reality these should be fit as parameters.
 import sys
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
-import emcee
 sys.path.insert(0,"../")
 import frisbee
 
@@ -102,6 +101,7 @@ if __name__ == "__main__":
            for i in range(nwalkers)]
     print "Starting MCMC for the model:",param_names
     print "\tnsteps:%d nwalkers:%d"%(nsteps, nwalkers)
+    import emcee
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data, initial_conditions))
     sampler.run_mcmc(pos,nsteps)
     print "MCMC complete for the model:",param_names
