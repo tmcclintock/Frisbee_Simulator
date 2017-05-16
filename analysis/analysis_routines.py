@@ -15,13 +15,17 @@ import frisbee
 param_names = ["PD0","PDa"]
 
 #Read in the trajectory 
-data = np.genfromtxt("../simulation_data/sample_throw.txt", unpack=True)
+data = np.genfromtxt("../simulation_data/sample_throw.txt").T
 
 #True starting condtions of kinematic variables we don't test
 xi, yi, zi                 = data[1:4, 0] #meters
 vxi, vyi, vzi              = 10.0, 0.0, 0.0 #m/s
 phi, theta, gamma          = 0.0, -0.25, 0.0 #radians
 phidot, thetadot, gammadot = 0.0, 0.0, 50.0 #rad/sec
+initial_conditions = [xi, yi, zi, 
+                      vxi, vyi, vzi, 
+                      phi, theta, gamma, 
+                      phidot, thetadot, gammadot]
 
 #Figure out everything about the times that we will integrate over
 #when we model the throw.
@@ -46,6 +50,7 @@ def get_full_model(params):
     hand when more parameters are looked at.
     """
     PD0, PDa = params[0:2]
+    model = true_model.copy()
     model[2:4] = PD0, PDa
     return model
 
@@ -59,9 +64,10 @@ def lnprior(params):
     return 0
 
 #The likelihood
-def lnlike(params,data):
+def lnlike(params, data, initial_conditions):
     model = get_full_model(params)
     t,x,y,z,x_err,y_err,z_err = data
+    xi, yi, zi, vxi, vyi, vzi, phi, theta, gamma, phidot, thetadot, gammadot = initial_conditions
     test_frisbee = frisbee.Frisbee(xi, yi, zi,
                                    vxi, vyi, vzi,
                                    phi, theta, gamma,
@@ -79,10 +85,10 @@ def lnlike(params,data):
     return xchi2 + ychi2 + zchi2
 
 #The posterior
-def lnprob(params,data):
+def lnprob(params, data, initial_conditions):
     lp = lnprior(params)
     if not np.isfinite(lp): return -np.inf
-    return lp + lnlike(params, data)
+    return lp + lnlike(params, data, initial_conditions)
 
 #An EXAMPLE of how to run the analysis functions.
 if __name__ == "__main__":
@@ -96,7 +102,7 @@ if __name__ == "__main__":
            for i in range(nwalkers)]
     print "Starting MCMC for the model:",param_names
     print "\tnsteps:%d nwalkers:%d"%(nsteps, nwalkers)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data,))
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data, initial_conditions))
     sampler.run_mcmc(pos,nsteps)
     print "MCMC complete for the model:",param_names
     
