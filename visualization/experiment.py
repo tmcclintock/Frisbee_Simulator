@@ -66,9 +66,9 @@ ax0.set_zlim(0,max(z))
 line = ax0.plot(x, y ,z)[0]
 wall_shadow   = ax0.plot(x, zeros+max(y), z, linestyle='--')[0]
 ground_shadow = ax0.plot(x, y, zeros, linestyle='--')[0]
-ax0.set_xlabel(r"${\rm X\ [m] }$")
-ax0.set_ylabel(r"${\rm Y\ [m] }$")
-ax0.set_zlabel(r"${\rm Z\ [m] }$")
+ax0.set_xlabel(r"${\rm X}\ [{\rm m}]$")
+ax0.set_ylabel(r"${\rm Y}\ [{\rm m}]$")
+ax0.set_zlabel(r"${\rm Z}\ [{\rm m}]$")
 
 #While the 3D plot contains the trajectory,
 #these extra plots can contain the pitch and roll angles, updated
@@ -90,8 +90,8 @@ ax2.set_title(r"${\rm Front-Back}$",y=title_loc)
 
 ax3 = plt.subplot(gs[2,2])
 gammadline = ax3.plot(times, gammad)[0]
-ax3.set_ylabel(r"${\rm Spin}$ $[rad/s]$")
-ax3.set_xlabel(r"${\rm Time}$ $[s]$")
+ax3.set_ylabel(r"${\rm Spin}$ $[{\rm rad/s}]$")
+ax3.set_xlabel(r"${\rm Time}$ $[{\rm s}]$")
 ax3.set_title(r"${\rm Rotation\ Rate}$",y=title_loc)
 
 

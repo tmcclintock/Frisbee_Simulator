@@ -13,6 +13,11 @@ nwalkers = 6
 ndim = 2
 nsteps = 10000
 
+#Define what parameters to look at
+param_names = ["PD0","PDa"]
+chainname = "".join(param_names)
+labels = [r"$P_{D0}$",r"$P_{D\alpha}$"]
+
 #Set up the walkers in parameter space with true positions
 true_params = [0.18, 0.69] #PD0, PDa true positions
 
@@ -75,9 +80,10 @@ def make_accuracy_figure(steps, FPS, from_scratch=True):
     for i in range(len(true_params)):
         axarr[i].errorbar(FPS, means[:,i], stds[:, i], marker='.')
         axarr[i].axhline(true_params[i], c='k', ls='--')
+        axarr[i].set_ylabel(labels[i])
     plt.xscale("log")
     plt.xlabel(r"${\rm Frames/sec$")
-    plt.subplots_adjust(hspace=0.00, bottom=0.15)
+    plt.subplots_adjust(hspace=0.00, bottom=0.15, left=0.15)
     plt.show()
 
 if __name__ == "__main__":
