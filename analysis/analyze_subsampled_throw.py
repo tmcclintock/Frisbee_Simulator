@@ -38,21 +38,24 @@ for i in range(1, N/3):
     print "%d data points"%len(ti), "at FPS = %.2f"%(1./(ti[1]-ti[0]))
     #subsample the data
     datai = data[:, ::i]
+    #for j in range(1, 4): #Put in some scatterin x y z
+    #    datai[j] += np.random.randn(len(datai[j]))*0.05
     
     #Set up the walkers in parameter space with true positions
     test_params = [0.18, 0.69] #PD0, PDa true positions
 
-    nwalkers = 4
+    nwalkers = 6
     ndim = 2
-    nsteps = 500
+    nsteps = 10000
     pos = [test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim) 
-           for i in range(nwalkers)]
+           for j in range(nwalkers)]
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(datai, initial_conditions))
     sampler.run_mcmc(pos,nsteps)
     fullchain = sampler.flatchain
-    chain = fullchain[200:]
-    print np.mean(chain, 0), np.std(chain, 0)
-    if FPScurrent  < 30:
-        corner.corner(chain)
-        plt.show()
+    np.savetxt("chains/subsamp_chain_FPS%d.txt"%i, fullchain)
+    #chain = fullchain[200:]
+    #print np.mean(chain, 0), np.std(chain, 0)
+    #if FPScurrent  < 30:
+    #corner.corner(chain)
+    #plt.show()
 
