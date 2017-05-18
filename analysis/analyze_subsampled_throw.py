@@ -17,6 +17,7 @@ nsteps = 10000
 param_names = ["PD0","PDa"]
 chainname = "".join(param_names)
 labels = [r"$P_{D0}$",r"$P_{D\alpha}$"]
+errlabels = [r"$\sigma_{P_{D0}}/P_{D0}$",r"$\sigma_{P_{D\alpha}}/P_{D\alpha}$"]
 
 #Set up the walkers in parameter space with true positions
 true_params = [0.18, 0.69] #PD0, PDa true positions
@@ -48,17 +49,17 @@ def get_unique_steps_and_FPSs(times):
         else: continue
     return steps, FPSs
 
-def run_chains(data, initial_conditions, with_scatter=False):
+def run_chains(data, initial_conditions, index, with_scatter=False):
     pos = [true_params + 1e-2*np.fabs(true_params)*np.random.randn(ndim) 
            for j in range(nwalkers)]
     print "Running a chain"
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(datai, initial_conditions))
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(data, initial_conditions))
     sampler.run_mcmc(pos,nsteps)
     fullchain = sampler.flatchain
     if with_scatter:
-        np.savetxt("chains/subsamp_chain_scatter_FPS%d.txt"%i, fullchain)
+        np.savetxt("chains/subsamp_chain_scatter_FPS%d.txt"%index, fullchain)
     else:
-        np.savetxt("chains/subsamp_chain_FPS%d.txt"%i, fullchain)
+        np.savetxt("chains/subsamp_chain_FPS%d.txt"%index, fullchain)
     return
 
 def make_accuracy_figure(steps, FPS, from_scratch=True):
@@ -86,10 +87,33 @@ def make_accuracy_figure(steps, FPS, from_scratch=True):
     plt.subplots_adjust(hspace=0.00, bottom=0.15, left=0.15)
     plt.show()
 
+def make_perr_figure(steps, FPS, from_scratch=True):
+    plt.rc("text", usetex=True, fontsize=20)
+    plt.rc("errorbar", capsize=3)
+    means = np.zeros((len(steps), len(true_params)))
+    stds = np.zeros_like(means)
+    fig, axarr = plt.subplots(len(true_params), sharex=True)
+    means = np.loadtxt("txt_files/subsamp_means.txt")
+    stds = np.loadtxt("txt_files/subsamp_stds.txt")
+    perr = stds/means
+    for i in range(len(true_params)):
+        axarr[i].plot(FPS, perr[:, i], marker='o')
+        axarr[i].set_ylabel(errlabels[i])
+    plt.xscale("log")
+    plt.xlabel(r"${\rm Frames/sec$")
+    plt.subplots_adjust(hspace=0.00, bottom=0.15, left=0.15)
+    plt.show()
+
+
 if __name__ == "__main__":
+
     #Figure out the initial FPS of the data
     t = data[0, :]
     steps, FPS = get_unique_steps_and_FPSs(t)
-    print steps, FPS
 
-    make_accuracy_figure(steps, FPS, False)
+    #Run the chains, if we want
+    #for s in steps:
+    #    run_chains(data[::s], initial_conditions, s)
+
+    #make_accuracy_figure(steps, FPS, False)
+    make_perr_figure(steps, FPS, False)
