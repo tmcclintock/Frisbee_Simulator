@@ -13,18 +13,10 @@ import frisbee
 #Define what parameters to look at
 param_names = ["PD0","PDa"]
 
-#Read in the trajectory 
+#Read in the trajectory , initial conditions and model
 data = np.genfromtxt("../simulation_data/sample_throw.txt").T
-
-#True starting condtions of kinematic variables we don't test
-xi, yi, zi                 = data[1:4, 0] #meters
-vxi, vyi, vzi              = 10.0, 0.0, 0.0 #m/s
-phi, theta, gamma          = 0.0, -0.25, 0.0 #radians
-phidot, thetadot, gammadot = 0.0, 0.0, 50.0 #rad/sec
-initial_conditions = [xi, yi, zi, 
-                      vxi, vyi, vzi, 
-                      phi, theta, gamma, 
-                      phidot, thetadot, gammadot]
+initial_conditions = np.loadtxt("../simulation_data/initial_conditions.txt")
+true_model = np.loadtxt("../simulation_data/simulated_model.txt")
 
 #Figure out everything about the times that we will integrate over
 #when we model the throw.
@@ -33,13 +25,6 @@ time_initial = t[0]
 time_final = t[-1]*1.01 #Go a little higher
 N_times = int((time_final-time_initial)/0.0033333) #300 times/sec
 times = np.linspace(time_initial,time_final,N_times)
-
-#This is for if we only test a few parameters at a time
-true_model = np.array([0.33, 1.9, #PL
-                       0.18, 0.69, #PD
-                       -1.3e-2, -1.7e-3, #Px
-                       -8.2e-2, 0.43, -1.4e-2, #Py
-                       -3.4e-5]) #Pz
 
 def get_full_model(params):
     """
@@ -96,7 +81,7 @@ if __name__ == "__main__":
 
     nwalkers = 4
     ndim = 2
-    nsteps = 1000
+    nsteps = 100
     pos = [test_params + 1e-2*np.fabs(test_params)*np.random.randn(ndim) 
            for i in range(nwalkers)]
     print "Starting MCMC for the model:",param_names

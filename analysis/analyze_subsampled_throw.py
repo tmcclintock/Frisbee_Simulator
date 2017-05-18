@@ -22,18 +22,9 @@ errlabels = [r"$\sigma_{P_{D0}}/P_{D0}$",r"$\sigma_{P_{D\alpha}}/P_{D\alpha}$"]
 #Set up the walkers in parameter space with true positions
 true_params = [0.18, 0.69] #PD0, PDa true positions
 
-#Read in the trajectory 
+#Read in the trajectory and the initial conditions
 data = np.genfromtxt("../simulation_data/sample_throw.txt").T
-
-#True starting condtions of kinematic variables we don't test
-xi, yi, zi                 = data[1:4, 0] #meters
-vxi, vyi, vzi              = 10.0, 0.0, 0.0 #m/s
-phi, theta, gamma          = 0.0, -0.25, 0.0 #radians
-phidot, thetadot, gammadot = 0.0, 0.0, 50.0 #rad/sec
-initial_conditions = [xi, yi, zi, 
-                      vxi, vyi, vzi, 
-                      phi, theta, gamma, 
-                      phidot, thetadot, gammadot]
+initial_conditions = np.loadtxt("../simulation_data/initial_conditions.txt")
 
 def get_unique_steps_and_FPSs(times):
     FPSs = []
@@ -110,10 +101,14 @@ if __name__ == "__main__":
     #Figure out the initial FPS of the data
     t = data[0, :]
     steps, FPS = get_unique_steps_and_FPSs(t)
+    steps = steps[::10]
+    FPS = FPS[::10]
+    for s,f in zip(steps, FPS):
+        print s, f
 
     #Run the chains, if we want
-    #for s in steps:
+    #for s in steps[::10]:
     #    run_chains(data[::s], initial_conditions, s)
 
     #make_accuracy_figure(steps, FPS, False)
-    make_perr_figure(steps, FPS, False)
+    #make_perr_figure(steps, FPS, False)

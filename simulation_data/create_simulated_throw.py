@@ -11,7 +11,8 @@ from scipy.integrate import odeint
 #Set up an array of times
 time_initial = 0.0
 time_final = 3.0
-N_times = int((time_final-time_initial)/0.003333) #300 FPS
+invFPS = 1./30000. #Inverse of the FPS
+N_times = int((time_final-time_initial)/invFPS)
 times = np.linspace(time_initial,time_final,N_times)
 dt = times[1]-times[0]
 
@@ -20,6 +21,7 @@ x,y,z = 0.0, 0.0, 1.0
 vx,vy,vz = 10.0,0.0,0.0
 phi,theta,gamma = 0.0,-0.25,0.0
 phidot,thetadot,gammadot = 0.0,0.0,50.0
+initial_conditions = np.array([x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot])
 
 #The frisbee
 test_frisbee = frisbee.Frisbee(x,y,z,
@@ -48,14 +50,21 @@ plt.plot(xs, ys, zs, alpha=0.5)
 plt.show()
 plt.clf()
 
-#Save it
+#Save the intial conditions
+np.savetxt("initial_conditions.txt", initial_conditions,
+           header="x y z vx vy vz phi theta gamma phidot thetadot gammadot")
+
+#Save the model
+np.savetxt("simulated_model.txt", model)
+
+#Save the simulated measurements
 err = np.ones_like(x) * 0.05 #5 centimeter error
 outputs = np.array([times, x, y, z, err, err, err]).T
 outputs = outputs[0::1] #Take every one
 outputs = outputs[outputs[:,3]>0,:] #Take only entries with +z
-#np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
+np.savetxt("sample_throw.txt",outputs,header="time (sec); x,y,z (m); x_err,y_err,z_err (m)")
 
 #Now save the full trajectory
 fulloutputs = np.vstack((times,trajectory.T)).T
 fulloutputs = fulloutputs[fulloutputs[:,3]>0,:] #Take only entries with +z
-#np.savetxt("simulated_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
+np.savetxt("simulated_trajectory.txt",fulloutputs,header="t x y z vx vy vz phi theta gamma phid thetad gammad")
