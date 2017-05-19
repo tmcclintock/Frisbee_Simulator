@@ -166,7 +166,7 @@ class Frisbee(object):
 
 
   def calc_body_hat_vectors(self):
-    """Calculates the unit (hat) vectors fixed to the disc (excluding spin) in terms of the lab frame.
+    """Calculates the unit (hat) vectors fixed to the disc (excluding spin) in terms of the lab frame, or [R^T dot \hat{x}_F]
     """
     v = self.velocity
     zbhat = self.rotation_matrix[2]
