@@ -169,11 +169,11 @@ class Frisbee(object):
     """Calculates the unit (hat) vectors fixed to the disc (excluding spin) in terms of the lab frame, or [R^T dot \hat{x}_F]
     """
     v = self.velocity
-    zbhat = self.rotation_matrix[2]
+    zbhat = self.rotation_matrix[2] #z body hat, expressed in the lab frame
     v_dot_zbhat = np.dot(v,zbhat)
     v_in_plane = v - (zbhat*v_dot_zbhat)
-    xbhat = v_in_plane/np.linalg.norm(v_in_plane)
-    ybhat = np.cross(zbhat,xbhat)
+    xbhat = v_in_plane/np.linalg.norm(v_in_plane) #x body hat, expressed in the lab frame
+    ybhat = np.cross(zbhat,xbhat) #y body hat, expressed in the lab frame
     return [xbhat,ybhat,zbhat]
 
 
