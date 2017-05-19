@@ -223,11 +223,13 @@ void equations_of_motion(double*positions,double*derivs,double t,double*params){
   double tau_y_amp = C_y(alpha,w_y,PTy0,PTywy,PTya)*tau_amp;
   double tau_z_amp = C_z(w_z,PTzwz)*tau_amp;
 
+  //Here, xy are the in the lab frame
   double tau_x[] = {x_C_hat[0]*tau_x_amp, x_C_hat[1]*tau_x_amp, x_C_hat[2]*tau_x_amp};
   double tau_y[] = {y_C_hat[0]*tau_y_amp, y_C_hat[1]*tau_y_amp, y_C_hat[2]*tau_y_amp};
-  double tau_z_N[] = {0, 0, tau_z_amp}; //Already in the correct frame
+  double tau_z_N[] = {0, 0, tau_z_amp}; //Already in the frisbee frame
 
-  //Calculate the total torque
+  //Calculate the total torque in the frisbee frame
+  //These are the time derivatives of w_F
   double tau_total[]={0,0,0};
   for(i=0;i<3;i++)
     {
