@@ -1,0 +1,1 @@
+This folder contains scripts for making various figures. This includes gifs for presentations as well as pdf figures for the paper.

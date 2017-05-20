@@ -1,10 +1,5 @@
 """
-This is an in-development vesion of plot_trajectory.py.
-
-The plan:
-show an animation of the trajectory
-also have the pitch and rolls in adjacent plots
-also have the spin vs time in an adjacent plot
+Create the multi-panel gif with the angles displayed in polar plots.
 """
 
 import numpy as np 
@@ -27,8 +22,6 @@ def update_lines(num, dataLines, lines):
             line.set_data(data[0:2, :num])
 
     return lines
-
-
     #Each dataLine is a 3xnum array
     #lines contains the matplotlib line objects
     for line, data in zip(lines, dataLines):
@@ -42,9 +35,12 @@ def update_line(num, data, line):
     line.set_3d_properties(data[2, :num])
     return line
 
-trajectory=np.loadtxt("full_trajectory.txt")
-print trajectory.shape
-trajectory = trajectory[::4] #Reduce the size for the gif purposes
+#Read in the data and down-sample to get the FPS we want
+trajectory=np.loadtxt("../simulation_data/full_trajectory.txt")
+T = trajectory[-1, 0] -trajectory[0, 0] #Total time
+N = len(trajectory)
+FPS = 60
+trajectory = trajectory[::int(N/(FPS*T))]
 
 times,x,y,z = trajectory.T[:4]
 phi, theta, gamma = trajectory.T[7:10]
@@ -55,7 +51,6 @@ phid, thetad, gammad = trajectory.T[10:]
 zeros = np.zeros(len(x))
 
 fig = plt.figure()
-#The gridspec shit
 gs = gridspec.GridSpec(3, 3)
 gs.update(left=0.05, right=0.78, wspace=0.55)
 
@@ -104,7 +99,7 @@ print "This will take %f milliseconds"%(len(x)*0.5)
 anim = animation.FuncAnimation(fig, update_lines, frames=len(x), 
                                fargs=(dataLines, lines), interval=10, blit=True)
 
-anim.save('multi_plot.gif', dpi=80, writer='imagemagick', fps=60)
+#anim.save('multi_plot.gif', dpi=80, writer='imagemagick', fps=60)
 
 plt.show()
 plt.clf()

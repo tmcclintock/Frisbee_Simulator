@@ -16,9 +16,12 @@ def update_line(num, data, line):
     line.set_3d_properties(data[2, :num])
     return line
 
-trajectory=np.loadtxt("sample_throw.txt")
-print trajectory.shape
-trajectory = trajectory[::4] #Reduce the size for the gif purposes
+#Read in the data and down-sample to get the FPS we want
+trajectory = np.loadtxt("../simulation_data/sample_throw.txt")
+T = trajectory[-1, 0] -trajectory[0, 0] #Total time
+N = len(trajectory)
+FPS = 60
+trajectory = trajectory[::int(N/(FPS*T))]
 
 times,x,y,z = trajectory.T[:4]
 
@@ -39,9 +42,8 @@ lines = [line,wall_shadow,ground_shadow]
 
 print len(x)," frames in the animation"
 print "This will take %f milliseconds"%(len(x)*0.5)
-anim = animation.FuncAnimation(fig, update_lines, frames=len(x), fargs=(dataLines, lines), interval=5, blit=True)
-
-anim.save('line.gif', dpi=80, writer='imagemagick', fps=60)
+#anim = animation.FuncAnimation(fig, update_lines, frames=len(x), fargs=(dataLines, lines), interval=5, blit=True)
+#anim.save('line.gif', dpi=80, writer='imagemagick', fps=60)
 
 plt.show()
 plt.clf()
