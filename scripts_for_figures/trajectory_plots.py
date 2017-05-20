@@ -1,5 +1,5 @@
 """
-Create figure 1, which shows the trajectory. Create this both with and without scatter.
+Create figures showing the trajectory, and trajectories with scatter on them.
 """
 import numpy as np
 import matplotlib.pyplot as plt
