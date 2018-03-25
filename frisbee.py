@@ -353,7 +353,21 @@ if __name__ == "__main__":
   model = np.array([0.33,1.9,0.18,0.69,-1.3e-2,
                     -1.7e-3,-8.2e-2,0.43,-1.4e-2,-3.4e-5])
   test_frisbee.initialize_model(model)
-  times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.1)
+
+
+  #Run the simulation code
+  #Get the times of each data point and the trajectory.
+  #trajectory contains each variable (x,y,z,vx,vy,vyz,etc.) at each timestep
+  times,trajectory = test_frisbee.get_trajectory(0.0,3.0,dt=0.001)
   print "Integrating the equations of motion at 30 time steps gives"
   print "all 12 kinematic variables at 30 times:",trajectory.shape
-  
+  x,y,z = trajectory[:,:3].T
+
+
+  #Try plotting the variables
+  try:
+    import matplotlib.pyplot as plt
+    plt.plot(x,z)
+    plt.show()
+  except ImportError:
+    print "Failed to import matplotlib"
