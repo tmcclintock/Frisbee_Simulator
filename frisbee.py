@@ -330,10 +330,12 @@ class Frisbee(object):
 #An example of initializing, printing, and calling a function of the frisbee
 if __name__ == "__main__":
   #Using a single frisbee
-  x,y,z = 0.0, 0.0, 1.0
-  vx,vy,vz = 10.0,0.0,0.0
-  phi,theta,gamma = 0.0,0.0,0.0
-  phidot,thetadot,gammadot = 0.0,0.0,50.0
+  #x,y,z = 0.0, 0.0, 1.0
+  #vx,vy,vz = 10.0,0.0,0.0
+  #phi,theta,gamma = 0.0,0.0,0.0
+  #phidot,thetadot,gammadot = 0.0,0.0,50.0
+  #Read in from a file for convenience
+  x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot = np.loadtxt("simple_initial_conditions.txt").T
   test_frisbee = Frisbee(x,y,z,
                          vx,vy,vz,
                          phi,theta,gamma,
