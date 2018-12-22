@@ -11,8 +11,14 @@ This repository contains code that can:
 
 A very simple example of how to use the code can be found in example/example_throw.py.
 
-It's authors can be contacted at tmcclintock@email.arizona.edu (Tom McClintock) and ehannah@email.arizona.edu (Elizabeth Hannah).
+It's authors can be contacted at thmsmcclintock@gmail.com (Tom McClintock) and ehannah@email.arizona.edu (Elizabeth Hannah).
 
 Requirements
 ============
-You should have at least scipy-0.17.0 to integrate the equations of motion correctly. This code has successfully been compiled with gcc-4.4.7 and gcc-4.8.
+
+The Python dependencies of this repository can be installed with
+```
+pip install -r requirements.txt
+```
+
+Additionally, in order to compile the fast back-end, you need a C compiler. This project has been tested with gcc 4.4.7, 4.4.8, and clang.
